@@ -1,0 +1,3389 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Trading Brain</title>
+  <link
+    href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap"
+    rel="stylesheet">
+  <style>
+    :root {
+      --bg: #020617;
+      --bg2: #0d1117;
+      --card: #111827;
+      --card2: #1a2234;
+      --border: #1f2937;
+      --border2: #2d3748;
+      --text: #E5E7EB;
+      --text2: #9CA3AF;
+      --text3: #4B5563;
+      --green: #16C784;
+      --green2: #0ea15e;
+      --red: #EA3943;
+      --gold: #F5B700;
+      --blue: #3b82f6;
+      --cyan: #06b6d4;
+      --accent: #F5B700;
+      --sig-bull: #16C784;
+      --sig-bear: #EA3943;
+      --sig-neu: #F5B700;
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    html,
+    body {
+      width: 100%;
+      height: 100%;
+    }
+
+    body {
+      font-family: 'Outfit', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      padding-bottom: 180px;
+      overflow-x: hidden;
+    }
+
+    /* TOPBAR */
+    .topbar {
+      background: var(--bg2);
+      border-bottom: 1px solid var(--border);
+      padding: 14px 20px 12px;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .tb-title {
+      font-size: 18px;
+      font-weight: 800;
+      letter-spacing: -0.5px;
+    }
+
+    .tb-title span {
+      color: var(--accent);
+    }
+
+    .tb-date {
+      font-size: 11px;
+      color: var(--text3);
+      font-family: 'JetBrains Mono', monospace;
+      margin-top: 2px;
+    }
+
+    .tb-right {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .mkt-pill {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 10px;
+      font-weight: 600;
+      padding: 3px 10px;
+      border-radius: 20px;
+    }
+
+    .pill-open {
+      background: rgba(34, 197, 94, 0.12);
+      color: var(--green);
+      border: 1px solid rgba(34, 197, 94, 0.3);
+    }
+
+    .pill-closed {
+      background: rgba(239, 68, 68, 0.12);
+      color: var(--red);
+      border: 1px solid rgba(239, 68, 68, 0.3);
+    }
+
+    .profile-btn {
+      width: 34px;
+      height: 34px;
+      border-radius: 50%;
+      background: var(--accent);
+      border: none;
+      cursor: pointer;
+      font-size: 13px;
+      font-weight: 800;
+      color: #000;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    /* SIGNAL TAGS */
+    .sig-tag {
+      font-size: 9px;
+      font-weight: 700;
+      padding: 2px 7px;
+      border-radius: 10px;
+      font-family: 'JetBrains Mono', monospace;
+    }
+
+    .sig-bull {
+      background: rgba(22, 199, 132, 0.15);
+      color: #16C784;
+    }
+
+    .sig-bear {
+      background: rgba(234, 57, 67, 0.15);
+      color: #EA3943;
+    }
+
+    .sig-neu {
+      background: rgba(245, 183, 0, 0.15);
+      color: #F5B700;
+    }
+
+    /* MODE TOGGLE */
+    .mode-toggle {
+      display: flex;
+      background: var(--card2);
+      border-radius: 20px;
+      padding: 3px;
+      border: 1px solid var(--border2);
+    }
+
+    .mode-btn {
+      padding: 4px 12px;
+      border-radius: 16px;
+      border: none;
+      font-family: 'Outfit', sans-serif;
+      font-size: 10px;
+      font-weight: 700;
+      cursor: pointer;
+      color: var(--text3);
+      background: none;
+      transition: all 0.2s;
+    }
+
+    .mode-btn.active {
+      background: var(--accent);
+      color: #000;
+    }
+
+    /* GOAL */
+    .goal-strip {
+      background: var(--bg2);
+      border-bottom: 1px solid var(--border);
+      padding: 8px 16px;
+    }
+
+    .goal-row {
+      display: flex;
+      justify-content: space-between;
+      font-size: 11px;
+      margin-bottom: 4px;
+    }
+
+    .goal-row span:first-child {
+      color: var(--text3);
+    }
+
+    .goal-row span:last-child {
+      font-family: 'JetBrains Mono', monospace;
+      color: var(--accent);
+      font-weight: 600;
+    }
+
+    .track {
+      background: var(--border);
+      border-radius: 4px;
+      height: 3px;
+    }
+
+    .fill {
+      height: 3px;
+      border-radius: 4px;
+      background: linear-gradient(90deg, #16C784, var(--accent));
+      transition: width 0.5s;
+    }
+
+    /* SCREENS */
+    .screen {
+      display: none;
+      padding: 12px 16px;
+    }
+
+    .screen.active {
+      display: block;
+    }
+
+    /* SECTION HEAD */
+    .sec-head {
+      font-size: 10px;
+      font-weight: 700;
+      color: var(--text3);
+      text-transform: uppercase;
+      letter-spacing: 1.5px;
+      margin: 8px 0 6px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .sec-head::after {
+      content: '';
+      flex: 1;
+      height: 1px;
+      background: var(--border);
+    }
+
+    /* MARKET BUTTONS */
+    .mkt-grid6 {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 6px;
+      margin-bottom: 10px;
+    }
+
+    .mkt-btn {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 9px 4px;
+      text-align: center;
+      text-decoration: none;
+      display: block;
+    }
+
+    .mkt-btn:active {
+      opacity: 0.8;
+    }
+
+    .mbt-icon {
+      font-size: 18px;
+      margin-bottom: 3px;
+    }
+
+    .mbt-name {
+      font-size: 11px;
+      font-weight: 700;
+      color: var(--text);
+    }
+
+    .mbt-src {
+      font-size: 9px;
+      font-family: 'JetBrains Mono', monospace;
+      margin-top: 1px;
+    }
+
+    /* CARDS */
+    .link-card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 8px 10px;
+      margin-bottom: 5px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      text-decoration: none;
+    }
+
+    .link-card:active {
+      opacity: 0.8;
+    }
+
+    .lc-icon {
+      font-size: 16px;
+      flex-shrink: 0;
+    }
+
+    .lc-body {
+      flex: 1;
+    }
+
+    .lc-title {
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--text);
+      margin-bottom: 1px;
+    }
+
+    .lc-sub {
+      font-size: 10px;
+      color: var(--text3);
+    }
+
+    .lc-arr {
+      font-size: 12px;
+      color: var(--text3);
+    }
+
+    /* STEPS */
+    .prog-card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 10px 14px;
+      margin-bottom: 10px;
+      display: flex;
+      justify-content: space-between;
+    }
+
+    .pc-l {
+      font-size: 12px;
+      color: var(--text2);
+    }
+
+    .pc-r {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 12px;
+      color: var(--accent);
+      font-weight: 600;
+    }
+
+    .step-card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 11px 12px;
+      margin-bottom: 6px;
+      transition: opacity 0.2s;
+    }
+
+    .step-card.done {
+      opacity: 0.6;
+    }
+
+    .step-top {
+      display: flex;
+      align-items: flex-start;
+      gap: 12px;
+    }
+
+    .chk {
+      width: 22px;
+      height: 22px;
+      border-radius: 50%;
+      border: 1.5px solid var(--border2);
+      background: none;
+      cursor: pointer;
+      flex-shrink: 0;
+      font-size: 11px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: transparent;
+      transition: all 0.15s;
+      margin-top: 1px;
+    }
+
+    .step-card.done .chk {
+      background: var(--green);
+      border-color: var(--green);
+      color: #000;
+    }
+
+    .step-info {
+      flex: 1;
+    }
+
+    .step-name {
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--text);
+      margin-bottom: 2px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .info-btn {
+      width: 16px;
+      height: 16px;
+      border-radius: 50%;
+      background: var(--border2);
+      border: none;
+      color: var(--text3);
+      font-size: 9px;
+      font-weight: 700;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+
+    .step-sub {
+      font-size: 10px;
+      color: var(--text3);
+      margin-bottom: 5px;
+    }
+
+    .direct-link {
+      font-size: 11px;
+      color: var(--blue);
+      font-family: 'JetBrains Mono', monospace;
+      text-decoration: none;
+    }
+
+    /* OVERLAY */
+    .overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.85);
+      z-index: 500;
+      display: none;
+      align-items: flex-end;
+      backdrop-filter: blur(4px);
+    }
+
+    .overlay.show {
+      display: flex;
+    }
+
+    .exp-sheet {
+      background: var(--bg2);
+      border-top: 1px solid var(--border2);
+      border-radius: 20px 20px 0 0;
+      padding: 20px 20px 32px;
+      width: 100%;
+      max-height: 85vh;
+      overflow-y: auto;
+      animation: slideUp 0.25s ease;
+    }
+
+    @keyframes slideUp {
+      from {
+        transform: translateY(100%);
+      }
+
+      to {
+        transform: translateY(0);
+      }
+    }
+
+    .exp-close {
+      width: 100%;
+      display: flex;
+      justify-content: center;
+      margin-bottom: 16px;
+    }
+
+    .exp-close-bar {
+      width: 40px;
+      height: 4px;
+      background: var(--border2);
+      border-radius: 4px;
+    }
+
+    .exp-icon {
+      font-size: 32px;
+      margin-bottom: 10px;
+      text-align: center;
+    }
+
+    .exp-title {
+      font-size: 18px;
+      font-weight: 800;
+      margin-bottom: 14px;
+    }
+
+    .exp-body {
+      font-size: 14px;
+      color: var(--text2);
+      line-height: 1.7;
+      margin-bottom: 20px;
+    }
+
+    .exp-body strong {
+      color: var(--text);
+      font-weight: 600;
+    }
+
+    .exp-body .tip {
+      background: var(--card2);
+      border-left: 3px solid var(--accent);
+      border-radius: 0 8px 8px 0;
+      padding: 10px 12px;
+      margin: 12px 0;
+      font-size: 13px;
+    }
+
+    .exp-btn {
+      display: block;
+      width: 100%;
+      padding: 14px;
+      background: linear-gradient(135deg, var(--green2), var(--green));
+      border: none;
+      border-radius: 12px;
+      color: #fff;
+      font-family: 'Outfit', sans-serif;
+      font-size: 14px;
+      font-weight: 700;
+      cursor: pointer;
+      text-decoration: none;
+      text-align: center;
+    }
+
+    /* CHECKLIST */
+    .check-item {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 11px 12px;
+      margin-bottom: 6px;
+    }
+
+    .ci-top {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .ci-check {
+      width: 24px;
+      height: 24px;
+      border-radius: 6px;
+      border: 1.5px solid var(--border2);
+      background: none;
+      cursor: pointer;
+      flex-shrink: 0;
+      font-size: 13px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: transparent;
+      transition: all 0.15s;
+    }
+
+    .ci-check.checked {
+      background: var(--green);
+      border-color: var(--green);
+      color: #fff;
+    }
+
+    .ci-label {
+      flex: 1;
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--text);
+    }
+
+    .ci-info {
+      width: 24px;
+      height: 24px;
+      border-radius: 8px;
+      background: var(--card2);
+      border: 1px solid var(--border2);
+      color: var(--text3);
+      font-size: 11px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+
+    .go-trade {
+      margin-top: 14px;
+      padding: 16px;
+      border-radius: 14px;
+      text-align: center;
+      font-size: 16px;
+      font-weight: 700;
+      border: none;
+      width: 100%;
+      cursor: pointer;
+      font-family: 'Outfit', sans-serif;
+    }
+
+    .go-green {
+      background: linear-gradient(135deg, #16a34a, #22c55e);
+      color: #fff;
+    }
+
+    .go-red {
+      background: rgba(239, 68, 68, 0.12);
+      color: var(--red);
+      border: 1px solid rgba(239, 68, 68, 0.3);
+    }
+
+    /* NEWS TABS */
+    .news-tabs {
+      display: flex;
+      gap: 6px;
+      margin-bottom: 14px;
+      overflow-x: auto;
+      padding-bottom: 4px;
+      scrollbar-width: none;
+    }
+
+    .news-tabs::-webkit-scrollbar {
+      display: none;
+    }
+
+    .news-tab {
+      padding: 7px 14px;
+      border-radius: 20px;
+      border: 1px solid var(--border);
+      background: none;
+      color: var(--text3);
+      font-family: 'Outfit', sans-serif;
+      font-size: 12px;
+      font-weight: 600;
+      cursor: pointer;
+      white-space: nowrap;
+      flex-shrink: 0;
+    }
+
+    .news-tab.active {
+      background: var(--accent);
+      color: #000;
+      border-color: var(--accent);
+    }
+
+    .news-sec {
+      display: none;
+    }
+
+    .news-sec.active {
+      display: block;
+    }
+
+    /* PROFILE */
+    .profile-top {
+      text-align: center;
+      padding: 20px 0 16px;
+      border-bottom: 1px solid var(--border);
+      margin-bottom: 16px;
+    }
+
+    .p-avatar {
+      width: 60px;
+      height: 60px;
+      border-radius: 50%;
+      background: var(--accent);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 24px;
+      font-weight: 800;
+      color: #000;
+      margin: 0 auto 10px;
+    }
+
+    .p-name {
+      font-size: 18px;
+      font-weight: 700;
+    }
+
+    .p-sub {
+      font-size: 12px;
+      color: var(--text3);
+      font-family: 'JetBrains Mono', monospace;
+      margin-top: 2px;
+    }
+
+    .p-menu-item {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 11px 12px;
+      margin-bottom: 6px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      cursor: pointer;
+    }
+
+    .pmi-icon {
+      font-size: 20px;
+    }
+
+    .pmi-label {
+      font-size: 14px;
+      font-weight: 600;
+      flex: 1;
+    }
+
+    .pmi-arrow {
+      font-size: 16px;
+      color: var(--text3);
+    }
+
+    /* FORMS */
+    .add-card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 14px;
+      margin-bottom: 14px;
+    }
+
+    .r2 {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+      margin-bottom: 8px;
+    }
+
+    .r3 {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: 8px;
+      margin-bottom: 8px;
+    }
+
+    .r1 {
+      margin-bottom: 8px;
+    }
+
+    input,
+    select,
+    textarea {
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      color: var(--text);
+      font-family: 'Outfit', sans-serif;
+      font-size: 13px;
+      padding: 10px 12px;
+      width: 100%;
+      outline: none;
+    }
+
+    input:focus,
+    select:focus {
+      border-color: var(--accent);
+    }
+
+    input::placeholder,
+    textarea::placeholder {
+      color: var(--text3);
+    }
+
+    select option {
+      background: var(--card);
+    }
+
+    textarea {
+      resize: none;
+      height: 60px;
+    }
+
+    .btn-p {
+      width: 100%;
+      padding: 12px;
+      border-radius: 10px;
+      border: none;
+      font-family: 'Outfit', sans-serif;
+      font-size: 13px;
+      font-weight: 700;
+      cursor: pointer;
+    }
+
+    .btn-gold {
+      background: var(--accent);
+      color: #000;
+    }
+
+    .btn-green {
+      background: var(--green);
+      color: #fff;
+    }
+
+    /* WATCHLIST */
+    .stock-card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 14px;
+      margin-bottom: 8px;
+    }
+
+    .sc-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 10px;
+    }
+
+    .sc-name {
+      font-size: 16px;
+      font-weight: 700;
+    }
+
+    .tag {
+      font-size: 10px;
+      font-family: 'JetBrains Mono', monospace;
+      font-weight: 600;
+      padding: 3px 8px;
+      border-radius: 20px;
+    }
+
+    .tag-i {
+      background: rgba(59, 130, 246, 0.12);
+      color: var(--blue);
+    }
+
+    .tag-s {
+      background: rgba(245, 158, 11, 0.12);
+      color: var(--gold);
+    }
+
+    .levels {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: 6px;
+      margin-bottom: 10px;
+    }
+
+    .lv {
+      background: var(--bg);
+      border-radius: 8px;
+      padding: 8px;
+      text-align: center;
+      border: 1px solid var(--border);
+    }
+
+    .lv-l {
+      font-size: 9px;
+      color: var(--text3);
+      text-transform: uppercase;
+      letter-spacing: 0.8px;
+      margin-bottom: 2px;
+    }
+
+    .lv-v {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 13px;
+      font-weight: 600;
+    }
+
+    .sc-note {
+      font-size: 11px;
+      color: var(--text3);
+      font-style: italic;
+      margin-bottom: 8px;
+    }
+
+    .del-btn {
+      font-size: 11px;
+      color: var(--red);
+      background: rgba(239, 68, 68, 0.08);
+      border: 1px solid rgba(239, 68, 68, 0.2);
+      border-radius: 6px;
+      padding: 5px 10px;
+      cursor: pointer;
+    }
+
+    /* LOG */
+    .capital-card {
+      background: var(--card2);
+      border: 1px solid var(--border2);
+      border-radius: 10px;
+      padding: 12px 14px;
+      margin-bottom: 10px;
+    }
+
+    .cap-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 6px;
+    }
+
+    .cap-l {
+      font-size: 12px;
+      color: var(--text2);
+    }
+
+    .cap-v {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 13px;
+      font-weight: 600;
+    }
+
+    .month-card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 16px;
+      margin-bottom: 14px;
+    }
+
+    .month-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      margin-bottom: 12px;
+    }
+
+    .mt-label {
+      font-size: 11px;
+      color: var(--text3);
+      margin-bottom: 4px;
+    }
+
+    .mt-val {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 26px;
+      font-weight: 700;
+    }
+
+    .mt-sub {
+      font-size: 10px;
+      color: var(--text3);
+      font-family: 'JetBrains Mono', monospace;
+      margin-top: 3px;
+    }
+
+    .stats-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: 6px;
+    }
+
+    .stat-box {
+      background: var(--bg);
+      border-radius: 8px;
+      padding: 8px;
+      text-align: center;
+      border: 1px solid var(--border);
+    }
+
+    .stat-l {
+      font-size: 9px;
+      color: var(--text3);
+      text-transform: uppercase;
+      letter-spacing: 0.8px;
+      margin-bottom: 3px;
+    }
+
+    .stat-v {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 14px;
+      font-weight: 600;
+    }
+
+    .tabs {
+      display: flex;
+      gap: 6px;
+      margin-bottom: 12px;
+    }
+
+    .tab {
+      flex: 1;
+      padding: 9px;
+      border-radius: 8px;
+      border: 1px solid var(--border);
+      background: none;
+      color: var(--text3);
+      font-family: 'Outfit', sans-serif;
+      font-size: 12px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+
+    .tab.active {
+      background: var(--accent);
+      color: #000;
+      border-color: var(--accent);
+      font-weight: 800;
+    }
+
+    .log-view {
+      display: none;
+    }
+
+    .log-view.active {
+      display: block;
+    }
+
+    .trade-card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 13px;
+      margin-bottom: 8px;
+    }
+
+    .tc-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      margin-bottom: 8px;
+    }
+
+    .tc-stock {
+      font-size: 15px;
+      font-weight: 700;
+    }
+
+    .tc-meta {
+      font-size: 10px;
+      color: var(--text3);
+      font-family: 'JetBrains Mono', monospace;
+      margin-top: 2px;
+    }
+
+    .tc-pnl {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 17px;
+      font-weight: 700;
+    }
+
+    .tc-details {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 5px;
+      margin-bottom: 8px;
+    }
+
+    .td-box {
+      background: var(--bg);
+      border-radius: 6px;
+      padding: 6px;
+      text-align: center;
+      border: 1px solid var(--border);
+    }
+
+    .td-l {
+      font-size: 9px;
+      color: var(--text3);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .td-v {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 12px;
+      font-weight: 500;
+    }
+
+    .tc-note {
+      font-size: 11px;
+      color: var(--text3);
+      font-style: italic;
+      margin-bottom: 6px;
+    }
+
+    .up {
+      color: var(--green);
+    }
+
+    .dn {
+      color: var(--red);
+    }
+
+    /* HELP POPUP */
+    .help-popup {
+      position: fixed;
+      bottom: 58px;
+      right: 16px;
+      background: var(--card);
+      border: 1px solid var(--border2);
+      border-radius: 14px;
+      padding: 12px;
+      z-index: 300;
+      display: none;
+      flex-direction: column;
+      gap: 8px;
+      min-width: 210px;
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.6);
+    }
+
+    .help-popup.show {
+      display: flex;
+    }
+
+    .help-overlay {
+      position: fixed;
+      inset: 0;
+      z-index: 299;
+      display: none;
+    }
+
+    .help-overlay.show {
+      display: block;
+    }
+
+    .help-item {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 10px 12px;
+      border-radius: 10px;
+      text-decoration: none;
+      border: 1px solid var(--border);
+      cursor: pointer;
+      background: none;
+      width: 100%;
+      text-align: left;
+    }
+
+    .help-item-icon {
+      font-size: 20px;
+      flex-shrink: 0;
+    }
+
+    .help-item-body {}
+
+    .help-item-title {
+      font-size: 13px;
+      font-weight: 700;
+      color: var(--text);
+    }
+
+    .help-item-sub {
+      font-size: 10px;
+      color: var(--text3);
+      margin-top: 1px;
+    }
+
+    /* Equal news cards */
+    .news-scroll-row {
+      overflow-x: auto;
+      display: flex;
+      gap: 10px;
+      padding-bottom: 10px;
+      margin-bottom: 6px;
+      scrollbar-width: none;
+    }
+
+    .news-scroll-row::-webkit-scrollbar {
+      display: none;
+    }
+
+    .news-card-item {
+      flex-shrink: 0;
+      width: 200px;
+      height: 90px;
+      text-decoration: none;
+    }
+
+    .news-card-inner {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 12px;
+      height: 100%;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+    }
+
+    .news-card-label {
+      font-size: 9px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      margin-bottom: 6px;
+    }
+
+    .news-card-text {
+      font-size: 11px;
+      font-weight: 600;
+      color: var(--text);
+      line-height: 1.4;
+    }
+
+    .ai-panel {
+      position: fixed;
+      inset: 0;
+      background: var(--bg2);
+      z-index: 400;
+      display: none;
+      flex-direction: column;
+    }
+
+    .ai-panel.show {
+      display: flex;
+    }
+
+    .ai-header {
+      background: var(--bg2);
+      border-bottom: 1px solid var(--border);
+      padding: 14px 20px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .ai-back {
+      background: none;
+      border: none;
+      color: var(--text3);
+      font-size: 20px;
+      cursor: pointer;
+    }
+
+    .ai-title {
+      font-size: 16px;
+      font-weight: 700;
+      flex: 1;
+    }
+
+    .ai-badge {
+      font-size: 10px;
+      background: rgba(245, 158, 11, 0.15);
+      color: var(--accent);
+      border: 1px solid rgba(245, 158, 11, 0.3);
+      padding: 2px 8px;
+      border-radius: 20px;
+      font-family: 'JetBrains Mono', monospace;
+    }
+
+    .ai-messages {
+      flex: 1;
+      overflow-y: auto;
+      padding: 16px 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .ai-msg {
+      max-width: 85%;
+      padding: 10px 14px;
+      border-radius: 14px;
+      font-size: 13px;
+      line-height: 1.55;
+    }
+
+    .ai-msg.user {
+      background: var(--accent);
+      color: #000;
+      align-self: flex-end;
+      border-radius: 14px 14px 4px 14px;
+      font-weight: 500;
+    }
+
+    .ai-msg.bot {
+      background: var(--card);
+      color: var(--text);
+      align-self: flex-start;
+      border-radius: 14px 14px 14px 4px;
+      border: 1px solid var(--border);
+    }
+
+    .ai-suggestions {
+      display: flex;
+      gap: 6px;
+      padding: 0 20px 10px;
+      overflow-x: auto;
+      scrollbar-width: none;
+    }
+
+    .ai-suggestions::-webkit-scrollbar {
+      display: none;
+    }
+
+    .ai-sug {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      padding: 6px 12px;
+      font-size: 11px;
+      color: var(--text2);
+      cursor: pointer;
+      white-space: nowrap;
+      flex-shrink: 0;
+    }
+
+    .ai-input-row {
+      padding: 14px 20px;
+      background: var(--bg2);
+      border-top: 1px solid var(--border);
+      display: flex;
+      gap: 10px;
+    }
+
+    .ai-input {
+      flex: 1;
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      color: var(--text);
+      font-family: 'Outfit', sans-serif;
+      font-size: 13px;
+      padding: 10px 14px;
+      outline: none;
+    }
+
+    .ai-input:focus {
+      border-color: var(--accent);
+    }
+
+    .ai-send {
+      background: var(--accent);
+      border: none;
+      border-radius: 10px;
+      color: #000;
+      font-size: 16px;
+      font-weight: 700;
+      width: 42px;
+      height: 42px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+
+    .pat-btn {
+      background: var(--card2);
+      border: 1px solid var(--border2);
+      color: var(--text2);
+      font-family: 'Outfit', sans-serif;
+      font-size: 11px;
+      padding: 5px 10px;
+      border-radius: 20px;
+      cursor: pointer;
+      margin: 2px 0;
+    }
+
+    .pat-btn.selected {
+      background: var(--accent);
+      color: #000;
+      border-color: var(--accent);
+      font-weight: 700;
+    }
+
+    .rr-good {
+      background: rgba(34, 197, 94, 0.12);
+      border: 1px solid rgba(34, 197, 94, 0.3);
+      border-radius: 10px;
+      padding: 12px;
+    }
+
+    .rr-warn {
+      background: rgba(239, 68, 68, 0.12);
+      border: 1px solid rgba(239, 68, 68, 0.3);
+      border-radius: 10px;
+      padding: 12px;
+    }
+
+    .rr-ok {
+      background: rgba(245, 158, 11, 0.12);
+      border: 1px solid rgba(245, 158, 11, 0.3);
+      border-radius: 10px;
+      padding: 12px;
+    }
+
+    .result-card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 14px;
+      margin-bottom: 8px;
+    }
+
+    .rc-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 6px;
+    }
+
+    .rc-label {
+      font-size: 11px;
+      color: var(--text3);
+    }
+
+    .rc-val {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 13px;
+      font-weight: 600;
+    }
+
+    /* BACK BTN */
+    .back-header {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 16px;
+    }
+
+    .back-btn {
+      background: none;
+      border: none;
+      color: var(--text3);
+      font-size: 20px;
+      cursor: pointer;
+      padding: 0;
+    }
+
+    .back-title {
+      font-size: 16px;
+      font-weight: 700;
+    }
+
+    .empty {
+      text-align: center;
+      padding: 32px 20px;
+      color: var(--text3);
+      font-size: 13px;
+    }
+
+    .empty-icon {
+      font-size: 32px;
+      margin-bottom: 8px;
+    }
+
+    .news-scroll-row::-webkit-scrollbar {
+      display: none;
+    }
+
+    /* NAV */
+    .bottom-nav {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      background: var(--bg2);
+      border-top: 1px solid var(--border);
+      display: flex;
+      z-index: 200;
+      padding-bottom: env(safe-area-inset-bottom, 0px);
+    }
+
+    .nb {
+      flex: 1;
+      padding: 8px 4px 6px;
+      border: none;
+      background: none;
+      color: var(--text3);
+      font-size: 18px;
+      cursor: pointer;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 2px;
+      transition: color 0.15s;
+    }
+
+    .nb span {
+      font-size: 8px;
+      font-family: 'JetBrains Mono', monospace;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .nb.active {
+      color: var(--accent);
+    }
+  </style>
+</head>
+
+<body>
+
+  <!-- TOP BAR -->
+  <div class="topbar">
+    <div>
+      <div class="tb-title">Trading <span>Brain</span></div>
+      <div class="tb-date" id="topDate"></div>
+    </div>
+    <div class="tb-right">
+      <div class="mkt-pill" id="mktStatus">● CLOSED</div>
+      <button class="profile-btn" onclick="showScreen('profile')">R</button>
+    </div>
+  </div>
+
+  <!-- GOAL BAR -->
+  <div class="goal-strip">
+    <div class="goal-row"><span>Monthly Goal Progress</span><span id="goalTxt">₹0 / ₹30,000</span></div>
+    <div class="track">
+      <div class="fill" id="goalFill" style="width:0%"></div>
+    </div>
+  </div>
+
+  <!-- MODE TOGGLE — subtle -->
+  <div
+    style="padding:5px 14px;background:var(--bg2);border-bottom:1px solid var(--border);display:flex;align-items:center;gap:8px;">
+    <div class="mode-toggle">
+      <button class="mode-btn" id="modePreMkt" onclick="setMode('pre')">🌅 Pre-Market</button>
+      <button class="mode-btn" id="modeLive" onclick="setMode('live')">📈 Live Market</button>
+    </div>
+    <span id="modeHint" style="font-size:10px;color:var(--text3)">Set before 9:15 AM</span>
+  </div>
+
+  <!-- HOME -->
+  <div class="screen active" id="s-home">
+
+    <div style="display:flex;align-items:center;justify-content:space-between;margin:8px 0 6px;">
+      <div class="sec-head" style="margin:0">⚡ Quick Market Access</div>
+      <button onclick="refreshTime()"
+        style="background:none;border:none;color:var(--text3);font-size:14px;opacity:0.5;cursor:pointer;padding:2px 4px;">↻</button>
+    </div>
+
+    <div class="mkt-grid6">
+      <a class="mkt-btn" href="https://www.nseindia.com/market-data/live-equity-market" target="_blank">
+        <div class="mbt-icon">📈</div>
+        <div class="mbt-name">NIFTY</div>
+        <div class="mbt-src" style="color:var(--green)">NSE India</div>
+      </a>
+      <a class="mkt-btn" href="https://www.bseindia.com/sensex/code/16/" target="_blank">
+        <div class="mbt-icon">📊</div>
+        <div class="mbt-name">SENSEX</div>
+        <div class="mbt-src" style="color:var(--green)">BSE India</div>
+      </a>
+      <a class="mkt-btn" href="https://groww.in/commodities/futures/mcx_gold" target="_blank">
+        <div class="mbt-icon">🥇</div>
+        <div class="mbt-name">GOLD</div>
+        <div class="mbt-src" style="color:var(--gold)">Groww MCX</div>
+      </a>
+      <a class="mkt-btn" href="https://www.tradingview.com/symbols/USDINR/" target="_blank">
+        <div class="mbt-icon">💵</div>
+        <div class="mbt-name">USD/INR</div>
+        <div class="mbt-src" style="color:var(--blue)">TradingView</div>
+      </a>
+      <a class="mkt-btn" href="https://www.moneycontrol.com/markets/global-indices/" target="_blank">
+        <div class="mbt-icon">🇺🇸</div>
+        <div class="mbt-name">DOW/NAS</div>
+        <div class="mbt-src" style="color:var(--blue)">Global</div>
+      </a>
+      <a class="mkt-btn" href="https://groww.in/commodities/futures/mcx_crudeoil" target="_blank">
+        <div class="mbt-icon">🛢️</div>
+        <div class="mbt-name">CRUDE</div>
+        <div class="mbt-src" style="color:var(--red)">Groww MCX</div>
+      </a>
+    </div>
+
+    <div class="sec-head">📰 Market News</div>
+    <div class="news-scroll-row">
+      <a class="news-card-item" href="https://economictimes.indiatimes.com/markets/stocks/news" target="_blank">
+        <div class="news-card-inner">
+          <div class="news-card-label" style="color:var(--red)">● ET MARKETS</div>
+          <div class="news-card-text">Top Stock Market Stories — What's moving today</div>
+        </div>
+      </a>
+      <a class="news-card-item" href="https://www.moneycontrol.com/news/business/markets/" target="_blank">
+        <div class="news-card-inner">
+          <div class="news-card-label" style="color:var(--red)">● MONEYCONTROL</div>
+          <div class="news-card-text">Latest Market News — Earnings, results, updates</div>
+        </div>
+      </a>
+      <a class="news-card-item" href="https://www.nseindia.com/companies-listing/corporate-filings-announcements"
+        target="_blank">
+        <div class="news-card-inner">
+          <div class="news-card-label" style="color:var(--text3)">NSE ANNOUNCEMENTS</div>
+          <div class="news-card-text">Corporate filings — Orders, results, board meetings</div>
+        </div>
+      </a>
+      <a class="news-card-item" href="https://trendlyne.com/equity/calendar/all/all/" target="_blank">
+        <div class="news-card-inner">
+          <div class="news-card-label" style="color:var(--text3)">RESULTS CALENDAR</div>
+          <div class="news-card-text">Companies announcing results today & tomorrow</div>
+        </div>
+      </a>
+      <a class="news-card-item" href="https://economictimes.indiatimes.com/markets/commodities/news" target="_blank">
+        <div class="news-card-inner">
+          <div class="news-card-label" style="color:var(--text3)">COMMODITIES</div>
+          <div class="news-card-text">Crude Oil, Gold & Commodity News</div>
+        </div>
+      </a>
+    </div>
+
+    <div class="sec-head">🔍 Stock Screeners</div>
+    <a class="link-card" href="https://www.nseindia.com/market-data/top-gainers-losers" target="_blank">
+      <div class="lc-icon">🔥</div>
+      <div class="lc-body">
+        <div class="lc-title">Top Gainers & Losers</div>
+        <div class="lc-sub">NSE India — Live top moving stocks today</div>
+      </div>
+      <div class="lc-arr">↗</div>
+    </a>
+    <a class="link-card" href="https://trendlyne.com/stock-screeners/volume-based/high-volume-stocks/top-gainers/today/"
+      target="_blank">
+      <div class="lc-icon">📊</div>
+      <div class="lc-body">
+        <div class="lc-title">Volume Shockers</div>
+        <div class="lc-sub">Trendlyne — Stocks with abnormal high volume</div>
+      </div>
+      <div class="lc-arr">↗</div>
+    </a>
+    <a class="link-card" href="https://trendlyne.com/equity/calendar/all/all/" target="_blank">
+      <div class="lc-icon">📅</div>
+      <div class="lc-body">
+        <div class="lc-title">Results Calendar</div>
+        <div class="lc-sub">Trendlyne — Upcoming earnings announcements</div>
+      </div>
+      <div class="lc-arr">↗</div>
+    </a>
+    <a class="link-card" href="https://trendlyne.com/macro-data/fii-dii/latest/" target="_blank">
+      <div class="lc-icon">🏦</div>
+      <div class="lc-body">
+        <div class="lc-title">FII / DII Activity</div>
+        <div class="lc-sub">Trendlyne — Foreign & domestic flows</div>
+      </div>
+      <div class="lc-arr">↗</div>
+    </a>
+    <a class="link-card" href="https://www.nseindia.com/market-data/pre-open-market-cm-and-emerge-market"
+      target="_blank">
+      <div class="lc-icon">⚡</div>
+      <div class="lc-body">
+        <div class="lc-title">Pre-Open Market</div>
+        <div class="lc-sub">NSE — Stocks gapping before 9:15 AM</div>
+      </div>
+      <div class="lc-arr">↗</div>
+    </a>
+    <a class="link-card" href="https://www.nseindia.com/report-detail/display-bulk-and-block-deals" target="_blank">
+      <div class="lc-icon">💼</div>
+      <div class="lc-body">
+        <div class="lc-title">Block & Bulk Deals</div>
+        <div class="lc-sub">NSE — Institutional buying/selling today</div>
+      </div>
+      <div class="lc-arr">↗</div>
+    </a>
+    <a class="link-card" href="https://trendlyne.com/portfolio/bulk-block-deals/" target="_blank">
+      <div class="lc-icon">📋</div>
+      <div class="lc-body">
+        <div class="lc-title">Bulk Block Deals (Alt)</div>
+        <div class="lc-sub">Trendlyne — NSE & BSE combined</div>
+      </div>
+      <div class="lc-arr">↗</div>
+    </a>
+    <a class="link-card" href="https://groww.in/share-market-today" target="_blank">
+      <div class="lc-icon">📱</div>
+      <div class="lc-body">
+        <div class="lc-title">Market Today</div>
+        <div class="lc-sub">Groww — Complete market overview</div>
+      </div>
+      <div class="lc-arr">↗</div>
+    </a>
+    <div style="height:20px;"></div>
+  </div>
+
+  <!-- NIGHT -->
+  <div class="screen" id="s-night">
+    <div class="sec-head">🌙 Night Routine</div>
+    <div class="prog-card"><span class="pc-l">Tonight's Progress</span><span class="pc-r" id="nightCnt">0/4</span></div>
+    <div id="nightList"></div>
+  </div>
+
+  <!-- MORNING -->
+  <div class="screen" id="s-morning">
+    <div class="sec-head">🌅 Morning Routine</div>
+    <div class="prog-card"><span class="pc-l">Morning Progress</span><span class="pc-r" id="mornCnt">0/5</span></div>
+    <div id="mornList"></div>
+  </div>
+
+  <!-- CHECK -->
+  <div class="screen" id="s-check">
+    <div class="sec-head">✅ Pre-Trade Checklist</div>
+    <div id="checkList"></div>
+    <button class="go-trade go-red" id="goBtn">🚫 Trading Locked — Complete Checklist</button>
+  </div>
+
+  <!-- PROFILE -->
+  <div class="screen" id="s-profile">
+    <div class="profile-top">
+      <div class="p-avatar">R</div>
+      <div class="p-name">Ranjith Kumar</div>
+      <div class="p-sub">Bangalore · ₹1.5L Capital · ₹30k/month goal</div>
+    </div>
+
+    <div class="sec-head">📊 This Month</div>
+    <div class="month-card">
+      <div class="month-top">
+        <div>
+          <div class="mt-label">P&L</div>
+          <div class="mt-val" id="mPnl">₹0</div>
+          <div class="mt-sub" id="mGoal">0% of ₹30,000 goal</div>
+        </div>
+        <div style="text-align:right">
+          <div class="mt-label">Win Rate</div>
+          <div class="mt-val" id="winRate" style="font-size:20px">–%</div>
+        </div>
+      </div>
+      <div class="stats-grid">
+        <div class="stat-box">
+          <div class="stat-l">Trades</div>
+          <div class="stat-v" id="totalTrades">0</div>
+        </div>
+        <div class="stat-box">
+          <div class="stat-l">Wins</div>
+          <div class="stat-v up" id="totalWins">0</div>
+        </div>
+        <div class="stat-box">
+          <div class="stat-l">Losses</div>
+          <div class="stat-v dn" id="totalLoss">0</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="sec-head">⚡ Core</div>
+    <div class="p-menu-item" onclick="showSub('pretrade')">
+      <div class="pmi-icon">📝</div>
+      <div class="pmi-label">Pre-Trade Entry Form</div>
+      <div class="pmi-arrow">›</div>
+    </div>
+    <div class="p-menu-item" onclick="showSub('dailypnl')">
+      <div class="pmi-icon">📅</div>
+      <div class="pmi-label">Daily P&L Tracker</div>
+      <div class="pmi-arrow">›</div>
+    </div>
+    <div class="p-menu-item" onclick="showSub('tradelog')">
+      <div class="pmi-icon">📒</div>
+      <div class="pmi-label">Trade Log</div>
+      <div class="pmi-arrow">›</div>
+    </div>
+
+    <div class="sec-head">🛠️ Tools</div>
+    <div class="p-menu-item" onclick="showSub('calculator')">
+      <div class="pmi-icon">🧮</div>
+      <div class="pmi-label">Position Size Calculator</div>
+      <div class="pmi-arrow">›</div>
+    </div>
+    <div class="p-menu-item" onclick="showSub('review')">
+      <div class="pmi-icon">🔍</div>
+      <div class="pmi-label">Trade Review</div>
+      <div class="pmi-arrow">›</div>
+    </div>
+    <div class="p-menu-item" onclick="showSub('screener')">
+      <div class="pmi-icon">🎯</div>
+      <div class="pmi-label">Morning Screener Shortlist</div>
+      <div class="pmi-arrow">›</div>
+    </div>
+    <div class="p-menu-item" onclick="showSub('watchlist')">
+      <div class="pmi-icon">📋</div>
+      <div class="pmi-label">Watchlist</div>
+      <div class="pmi-arrow">›</div>
+    </div>
+
+    <div class="sec-head">📊 Reports</div>
+    <div class="p-menu-item" onclick="showSub('monthly')">
+      <div class="pmi-icon">📈</div>
+      <div class="pmi-label">Monthly Report</div>
+      <div class="pmi-arrow">›</div>
+    </div>
+    <div class="p-menu-item" onclick="showSub('streak')">
+      <div class="pmi-icon">🔥</div>
+      <div class="pmi-label">Streak Tracker</div>
+      <div class="pmi-arrow">›</div>
+    </div>
+    <div class="p-menu-item" onclick="showSub('brokerage')">
+      <div class="pmi-icon">💰</div>
+      <div class="pmi-label">Brokerage Calculator</div>
+      <div class="pmi-arrow">›</div>
+    </div>
+
+    <div class="sec-head">⚙️ More</div>
+    <div class="p-menu-item" onclick="showSub('settings')">
+      <div class="pmi-icon">⚙️</div>
+      <div class="pmi-label">Settings</div>
+      <div class="pmi-arrow">›</div>
+    </div>
+  </div>
+
+  <!-- POSITION SIZE CALCULATOR -->
+  <div class="screen" id="s-calculator">
+    <div class="back-header">
+      <button class="back-btn" onclick="goBack()">←</button>
+      <div class="back-title">🧮 Position Size Calculator</div>
+      <button onclick="showCalcHelp()"
+        style="background:var(--border2);border:none;color:var(--accent);font-size:12px;padding:4px 10px;border-radius:8px;cursor:pointer;margin-left:auto">ℹ️
+        How to use</button>
+    </div>
+
+    <div id="calcHelp"
+      style="display:none;background:var(--card2);border:1px solid var(--border2);border-radius:10px;padding:11px 12px;margin-bottom:12px;">
+      <div style="font-size:11px;color:var(--text2);line-height:1.6">
+        <strong style="color:var(--accent)">Example:</strong> SBI entry ₹800 · SL ₹785 · Risk = ₹15/share<br>
+        Max loss ₹750 ÷ ₹15 = <strong style="color:var(--green)">50 shares</strong> to buy<br>
+        <span style="color:var(--red);font-size:10px">⚠️ Never risk more than ₹3,000 per trade (2% of capital)</span>
+      </div>
+    </div>
+
+    <div class="add-card">
+      <div style="font-size:12px;color:var(--text3);margin-bottom:10px;font-weight:600">Enter trade details:</div>
+      <div class="r2">
+        <div>
+          <div style="font-size:10px;color:var(--text3);margin-bottom:4px">Capital (₹)</div>
+          <input type="number" id="calcCap" placeholder="e.g. 150000" value="150000">
+        </div>
+        <div>
+          <div style="font-size:10px;color:var(--text3);margin-bottom:4px">Max Risk per Trade (₹)</div>
+          <input type="number" id="calcRisk" placeholder="e.g. 750" value="750">
+        </div>
+      </div>
+      <div class="r2">
+        <div>
+          <div style="font-size:10px;color:var(--text3);margin-bottom:4px">Entry Price (₹)</div>
+          <input type="number" id="calcEntry" placeholder="e.g. 800">
+        </div>
+        <div>
+          <div style="font-size:10px;color:var(--text3);margin-bottom:4px">Stop Loss Price (₹)</div>
+          <input type="number" id="calcSL" placeholder="e.g. 785">
+        </div>
+      </div>
+      <div class="r1">
+        <div style="font-size:10px;color:var(--text3);margin-bottom:4px">Target Price (₹) — for R:R check</div>
+        <input type="number" id="calcTarget" placeholder="e.g. 830">
+      </div>
+      <button class="btn-p btn-gold" onclick="calcPosition()" style="margin-top:4px">Calculate 🧮</button>
+    </div>
+
+    <div id="calcResult" style="display:none"></div>
+  </div>
+
+  <!-- PRE-TRADE ENTRY FORM -->
+  <div class="screen" id="s-pretrade">
+    <div class="back-header">
+      <button class="back-btn" onclick="goBack()">←</button>
+      <div class="back-title">📝 Pre-Trade Entry Form</div>
+    </div>
+    <div
+      style="background:rgba(245,158,11,0.08);border:1px solid rgba(245,158,11,0.3);border-radius:10px;padding:12px;margin-bottom:14px;font-size:12px;color:var(--text2);line-height:1.6">
+      ⚠️ <strong style="color:var(--accent)">Fill this BEFORE every trade!</strong><br>
+      If you can't answer all fields — you're not ready to trade this stock yet!
+    </div>
+    <div class="add-card">
+      <div class="r2">
+        <div>
+          <div style="font-size:10px;color:var(--text3);margin-bottom:4px">Stock Name</div>
+          <input type="text" id="ptStock" placeholder="e.g. SBI">
+        </div>
+        <div>
+          <div style="font-size:10px;color:var(--text3);margin-bottom:4px">Trade Type</div>
+          <select id="ptType">
+            <option value="intraday">Intraday</option>
+            <option value="swing">Swing</option>
+          </select>
+        </div>
+      </div>
+      <div style="font-size:10px;color:var(--text3);margin-bottom:4px">What pattern/signal did you see?</div>
+      <div style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:10px" id="patternBtns">
+        <button onclick="selectPattern(this,'Volume Breakout')" class="pat-btn">📊 Volume Breakout</button>
+        <button onclick="selectPattern(this,'Gap Up + News')" class="pat-btn">⬆️ Gap Up + News</button>
+        <button onclick="selectPattern(this,'Support Bounce')" class="pat-btn">🔄 Support Bounce</button>
+        <button onclick="selectPattern(this,'Trend Continuation')" class="pat-btn">📈 Trend Continuation</button>
+        <button onclick="selectPattern(this,'Block Deal Buy')" class="pat-btn">🏦 Block Deal Buy</button>
+        <button onclick="selectPattern(this,'Results Reaction')" class="pat-btn">📅 Results Reaction</button>
+      </div>
+      <input type="hidden" id="ptPattern" value="">
+      <div class="r3">
+        <div>
+          <div style="font-size:10px;color:var(--text3);margin-bottom:4px">Entry ₹</div>
+          <input type="number" id="ptEntry" placeholder="800" oninput="calcRR()">
+        </div>
+        <div>
+          <div style="font-size:10px;color:var(--text3);margin-bottom:4px">Stop Loss ₹</div>
+          <input type="number" id="ptSL" placeholder="785" oninput="calcRR()">
+        </div>
+        <div>
+          <div style="font-size:10px;color:var(--text3);margin-bottom:4px">Target ₹</div>
+          <input type="number" id="ptTarget" placeholder="830" oninput="calcRR()">
+        </div>
+      </div>
+      <div id="rrDisplay" style="background:var(--card2);border-radius:8px;padding:10px;margin:8px 0;display:none">
+      </div>
+      <div style="font-size:10px;color:var(--text3);margin-bottom:4px">Why are you confident? (Reason)</div>
+      <textarea id="ptReason" placeholder="e.g. FII bought yesterday, volume 3x, stock in uptrend..."></textarea>
+      <button class="btn-p btn-green" onclick="savePreTrade()" style="margin-top:8px">✅ Confirm & Save Trade
+        Plan</button>
+    </div>
+    <div id="ptList"></div>
+  </div>
+
+  <!-- DAILY P&L TRACKER -->
+  <div class="screen" id="s-dailypnl">
+    <div class="back-header">
+      <button class="back-btn" onclick="goBack()">←</button>
+      <div class="back-title">📅 Daily P&L Tracker</div>
+    </div>
+    <div id="stopAlert"
+      style="display:none;background:rgba(239,68,68,0.15);border:2px solid var(--red);border-radius:12px;padding:16px;margin-bottom:14px;text-align:center">
+      <div style="font-size:24px;margin-bottom:6px">🛑</div>
+      <div style="font-size:16px;font-weight:800;color:var(--red);margin-bottom:4px">STOP TRADING TODAY!</div>
+      <div style="font-size:12px;color:var(--text2)">You have hit your daily loss limit of ₹1,500.<br>Close all
+        positions. Come back tomorrow fresh!</div>
+    </div>
+    <div class="month-card" style="margin-bottom:12px">
+      <div class="month-top">
+        <div>
+          <div class="mt-label">Today's P&L</div>
+          <div class="mt-val" id="dailyPnl">₹0</div>
+          <div class="mt-sub" id="dailyStatus">Target: ₹1,000 today</div>
+        </div>
+        <div style="text-align:right">
+          <div class="mt-label">Daily Target</div>
+          <div class="mt-val" style="font-size:18px;color:var(--accent)">₹1,000</div>
+        </div>
+      </div>
+      <div style="background:var(--border);border-radius:4px;height:6px;margin-top:4px">
+        <div id="dailyBar" style="height:6px;border-radius:4px;background:var(--green);width:0%;transition:width 0.5s">
+        </div>
+      </div>
+    </div>
+    <div class="add-card">
+      <div style="font-size:12px;font-weight:600;color:var(--text);margin-bottom:10px">Add today's trade result:</div>
+      <div class="r3">
+        <div>
+          <div style="font-size:10px;color:var(--text3);margin-bottom:4px">Stock</div>
+          <input type="text" id="dpStock" placeholder="SBI">
+        </div>
+        <div>
+          <div style="font-size:10px;color:var(--text3);margin-bottom:4px">P&L (₹)</div>
+          <input type="number" id="dpPnl" placeholder="+500 or -300">
+        </div>
+        <div style="display:flex;align-items:flex-end">
+          <button class="btn-p btn-gold" onclick="addDailyTrade()" style="height:40px">Add</button>
+        </div>
+      </div>
+    </div>
+    <div id="dailyList"></div>
+  </div>
+
+  <!-- TRADE REVIEW -->
+  <div class="screen" id="s-review">
+    <div class="back-header">
+      <button class="back-btn" onclick="goBack()">←</button>
+      <div class="back-title">🔍 Trade Review</div>
+    </div>
+    <div
+      style="background:rgba(34,197,94,0.08);border:1px solid rgba(34,197,94,0.2);border-radius:10px;padding:12px;margin-bottom:14px;font-size:12px;color:var(--text2);line-height:1.6">
+      💡 <strong style="color:var(--green)">Review after market closes every day!</strong><br>
+      Your friend got good by learning from every single trade. This is how you improve fast!
+    </div>
+    <div class="add-card">
+      <div class="r2">
+        <div>
+          <div style="font-size:10px;color:var(--text3);margin-bottom:4px">Stock</div>
+          <input type="text" id="revStock" placeholder="e.g. SBI">
+        </div>
+        <div>
+          <div style="font-size:10px;color:var(--text3);margin-bottom:4px">Result</div>
+          <select id="revResult">
+            <option value="win">✅ Win</option>
+            <option value="loss">❌ Loss</option>
+            <option value="breakeven">➡️ Breakeven</option>
+          </select>
+        </div>
+      </div>
+      <div style="font-size:10px;color:var(--text3);margin-bottom:4px">What went RIGHT? ✅</div>
+      <textarea id="revRight" placeholder="e.g. Followed the plan, good entry timing, volume confirmed..."
+        style="margin-bottom:8px"></textarea>
+      <div style="font-size:10px;color:var(--text3);margin-bottom:4px">What went WRONG? ❌</div>
+      <textarea id="revWrong" placeholder="e.g. Entered too late, SL was too wide, got emotional..."
+        style="margin-bottom:8px"></textarea>
+      <div style="font-size:10px;color:var(--text3);margin-bottom:4px">What will I do DIFFERENTLY next time? 🎯</div>
+      <textarea id="revDiff" placeholder="e.g. Will wait for volume confirmation before entering..."></textarea>
+      <button class="btn-p btn-green" onclick="saveReview()" style="margin-top:8px">💾 Save Review</button>
+    </div>
+    <div id="reviewList"></div>
+  </div>
+
+  <!-- MORNING SCREENER SHORTLIST -->
+  <div class="screen" id="s-screener">
+    <div class="back-header">
+      <button class="back-btn" onclick="goBack()">←</button>
+      <div class="back-title">🎯 Morning Screener Shortlist</div>
+    </div>
+    <div
+      style="background:rgba(245,158,11,0.08);border:1px solid rgba(245,158,11,0.3);border-radius:10px;padding:12px;margin-bottom:14px;font-size:12px;color:var(--text2);line-height:1.6">
+      📋 <strong style="color:var(--accent)">Every morning, check these 3 sources and pick 2-3 stocks only!</strong><br>
+      More stocks = confusion. 2-3 focused stocks = better trades!
+    </div>
+    <div class="sec-head">Step 1 — Check these sources</div>
+    <a class="link-card" href="https://trendlyne.com/stock-screeners/volume-based/high-volume-stocks/top-gainers/today/"
+      target="_blank">
+      <div class="lc-icon">📊</div>
+      <div class="lc-body">
+        <div class="lc-title">Volume Shockers</div>
+        <div class="lc-sub">Stocks with unusually high volume today</div>
+      </div>
+      <div class="lc-arr">↗</div>
+    </a>
+    <a class="link-card" href="https://www.nseindia.com/companies-listing/corporate-filings-announcements"
+      target="_blank">
+      <div class="lc-icon">📢</div>
+      <div class="lc-body">
+        <div class="lc-title">NSE News Today</div>
+        <div class="lc-sub">Stocks with important announcements</div>
+      </div>
+      <div class="lc-arr">↗</div>
+    </a>
+    <a class="link-card" href="https://www.nseindia.com/market-data/pre-open-market-cm-and-emerge-market"
+      target="_blank">
+      <div class="lc-icon">⚡</div>
+      <div class="lc-body">
+        <div class="lc-title">Pre-Open Gainers</div>
+        <div class="lc-sub">Stocks gapping up before 9:15 AM</div>
+      </div>
+      <div class="lc-arr">↗</div>
+    </a>
+    <div class="sec-head" style="margin-top:14px">Step 2 — Add your shortlist (max 3)</div>
+    <div class="add-card">
+      <div class="r3">
+        <div>
+          <div style="font-size:10px;color:var(--text3);margin-bottom:4px">Stock Name</div>
+          <input type="text" id="scStock" placeholder="e.g. SBI">
+        </div>
+        <div>
+          <div style="font-size:10px;color:var(--text3);margin-bottom:4px">Source</div>
+          <select id="scSource">
+            <option value="Volume Shocker">📊 Volume</option>
+            <option value="News">📢 News</option>
+            <option value="Pre-Open Gap">⚡ Pre-Open</option>
+          </select>
+        </div>
+        <div style="display:flex;align-items:flex-end">
+          <button class="btn-p btn-gold" onclick="addScreener()" style="height:40px">Add</button>
+        </div>
+      </div>
+      <div style="font-size:10px;color:var(--text3);margin-bottom:4px;margin-top:8px">Why this stock?</div>
+      <input type="text" id="scReason" placeholder="e.g. Volume 5x + good results yesterday">
+      <button class="btn-p" onclick="clearScreener()"
+        style="background:var(--border2);color:var(--text3);margin-top:8px">🗑️ Clear Today's List</button>
+    </div>
+    <div id="screenerList"></div>
+  </div>
+
+  <!-- MONTHLY REPORT -->
+  <div class="screen" id="s-monthly">
+    <div class="back-header">
+      <button class="back-btn" onclick="goBack()">←</button>
+      <div class="back-title">📈 Monthly Report</div>
+    </div>
+    <div id="monthlyReport"></div>
+  </div>
+
+  <!-- STREAK TRACKER -->
+  <div class="screen" id="s-streak">
+    <div class="back-header">
+      <button class="back-btn" onclick="goBack()">←</button>
+      <div class="back-title">🔥 Streak Tracker</div>
+    </div>
+    <div id="streakView"></div>
+  </div>
+
+  <!-- BROKERAGE CALCULATOR -->
+  <div class="screen" id="s-brokerage">
+    <div class="back-header">
+      <button class="back-btn" onclick="goBack()">←</button>
+      <div class="back-title">💰 Brokerage Calculator</div>
+    </div>
+    <div class="add-card">
+      <div style="font-size:12px;color:var(--text2);margin-bottom:10px;line-height:1.6">
+        📌 Groww charges: <strong style="color:var(--text)">₹20 or 0.05%</strong> per order (whichever is lower) for
+        intraday. STT, exchange charges also apply.
+      </div>
+      <div class="r2">
+        <div>
+          <div style="font-size:10px;color:var(--text3);margin-bottom:4px">Trade Type</div>
+          <select id="brType" onchange="calcBrokerage()">
+            <option value="intraday">Intraday (MIS)</option>
+            <option value="delivery">Delivery (CNC)</option>
+          </select>
+        </div>
+        <div>
+          <div style="font-size:10px;color:var(--text3);margin-bottom:4px">Buy Price (₹)</div>
+          <input type="number" id="brBuy" placeholder="800" oninput="calcBrokerage()">
+        </div>
+      </div>
+      <div class="r2">
+        <div>
+          <div style="font-size:10px;color:var(--text3);margin-bottom:4px">Sell Price (₹)</div>
+          <input type="number" id="brSell" placeholder="820" oninput="calcBrokerage()">
+        </div>
+        <div>
+          <div style="font-size:10px;color:var(--text3);margin-bottom:4px">Quantity</div>
+          <input type="number" id="brQty" placeholder="100" oninput="calcBrokerage()">
+        </div>
+      </div>
+    </div>
+    <div id="brokerageResult" style="display:none"></div>
+  </div>
+
+  <!-- WATCHLIST -->
+  <div class="screen" id="s-watchlist">
+    <div class="back-header">
+      <button class="back-btn" onclick="goBack()">←</button>
+      <div class="back-title">📋 Watchlist</div>
+    </div>
+    <div class="add-card">
+      <div class="r2">
+        <input id="wName" placeholder="Stock (e.g. SBI)" type="text">
+        <select id="wType">
+          <option value="intraday">Intraday</option>
+          <option value="swing">Swing</option>
+        </select>
+      </div>
+      <div class="r3">
+        <input id="wEntry" placeholder="Entry ₹" type="number">
+        <input id="wTarget" placeholder="Target ₹" type="number">
+        <input id="wSL" placeholder="SL ₹" type="number">
+      </div>
+      <div class="r1"><input id="wNote" placeholder="Why this stock?" type="text"></div>
+      <button class="btn-p btn-gold" onclick="addWatch()">+ Add Stock</button>
+    </div>
+    <div id="watchList"></div>
+  </div>
+
+  <!-- TRADE LOG -->
+  <div class="screen" id="s-tradelog">
+    <div class="back-header">
+      <button class="back-btn" onclick="goBack()">←</button>
+      <div class="back-title">📒 Trade Log</div>
+    </div>
+    <div class="capital-card">
+      <div class="cap-row">
+        <span class="cap-l">Starting Capital</span>
+        <div style="display:flex;align-items:center;gap:8px">
+          <span class="cap-v" id="startCapDisplay" style="color:var(--text2)">₹1,50,000</span>
+          <button onclick="editCap()"
+            style="background:var(--border2);border:none;color:var(--text3);font-size:11px;padding:3px 8px;border-radius:5px;cursor:pointer">Edit</button>
+        </div>
+      </div>
+      <div id="editCapRow" style="display:none;margin-bottom:8px">
+        <div style="display:flex;gap:8px">
+          <input type="number" id="capInput" placeholder="Enter capital" style="flex:1">
+          <button onclick="saveCap()"
+            style="background:var(--green);border:none;color:#fff;font-size:12px;padding:8px 12px;border-radius:8px;cursor:pointer;font-weight:600">Save</button>
+        </div>
+      </div>
+      <div class="cap-row">
+        <span class="cap-l">Current Capital</span>
+        <span class="cap-v" id="curCapital" style="color:var(--green)">₹1,50,000</span>
+      </div>
+    </div>
+    <div class="tabs">
+      <button class="tab active" onclick="logTab('list',this)">All Trades</button>
+      <button class="tab" onclick="logTab('add',this)">+ Add Trade</button>
+    </div>
+    <div class="log-view active" id="lv-list">
+      <div id="tradeList"></div>
+    </div>
+    <div class="log-view" id="lv-add">
+      <div class="add-card">
+        <div class="r2">
+          <input id="tStock" placeholder="Stock" type="text">
+          <select id="tType">
+            <option value="intraday">Intraday</option>
+            <option value="swing">Swing</option>
+          </select>
+        </div>
+        <div class="r3">
+          <input id="tEntry" placeholder="Entry ₹" type="number">
+          <input id="tExit" placeholder="Exit ₹" type="number">
+          <input id="tQty" placeholder="Qty" type="number">
+        </div>
+        <div class="r1"><input id="tDate" type="date"></div>
+        <div class="r1"><textarea id="tNote" placeholder="Lessons learned..."></textarea></div>
+        <button class="btn-p btn-green" onclick="addTrade()">💾 Save Trade</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- NEWS -->
+  <div class="screen" id="s-news">
+    <div class="back-header">
+      <button class="back-btn" onclick="goBack()">←</button>
+      <div class="back-title">📰 Market News</div>
+    </div>
+    <div class="news-tabs">
+      <button class="news-tab active" onclick="newsTab('nse',this)">🇮🇳 NSE</button>
+      <button class="news-tab" onclick="newsTab('bse',this)">📊 BSE</button>
+      <button class="news-tab" onclick="newsTab('global',this)">🌍 Global</button>
+      <button class="news-tab" onclick="newsTab('comm',this)">🛢️ Commodities</button>
+    </div>
+    <div class="news-sec active" id="ns-nse">
+      <a class="link-card" href="https://www.nseindia.com/companies-listing/corporate-filings-announcements"
+        target="_blank">
+        <div class="lc-icon">📢</div>
+        <div class="lc-body">
+          <div class="lc-title">NSE Announcements</div>
+          <div class="lc-sub">Corporate filings, results, board meetings</div>
+        </div>
+        <div class="lc-arr">↗</div>
+      </a>
+      <a class="link-card" href="https://economictimes.indiatimes.com/markets/stocks/news" target="_blank">
+        <div class="lc-icon">📰</div>
+        <div class="lc-body">
+          <div class="lc-title">ET — Stock News</div>
+          <div class="lc-sub">Economic Times market stories</div>
+        </div>
+        <div class="lc-arr">↗</div>
+      </a>
+      <a class="link-card" href="https://www.moneycontrol.com/news/business/markets/" target="_blank">
+        <div class="lc-icon">📈</div>
+        <div class="lc-body">
+          <div class="lc-title">Moneycontrol Markets</div>
+          <div class="lc-sub">Latest Indian market news</div>
+        </div>
+        <div class="lc-arr">↗</div>
+      </a>
+      <a class="link-card" href="https://www.nseindia.com/market-data/top-gainers-losers" target="_blank">
+        <div class="lc-icon">🔥</div>
+        <div class="lc-body">
+          <div class="lc-title">Top Gainers & Losers</div>
+          <div class="lc-sub">NSE live top movers today</div>
+        </div>
+        <div class="lc-arr">↗</div>
+      </a>
+    </div>
+    <div class="news-sec" id="ns-bse">
+      <a class="link-card" href="https://www.bseindia.com/corporates/ann.html" target="_blank">
+        <div class="lc-icon">📢</div>
+        <div class="lc-body">
+          <div class="lc-title">BSE Announcements</div>
+          <div class="lc-sub">Corporate filings on BSE</div>
+        </div>
+        <div class="lc-arr">↗</div>
+      </a>
+      <a class="link-card" href="https://www.bseindia.com/sensex/code/16/" target="_blank">
+        <div class="lc-icon">📊</div>
+        <div class="lc-body">
+          <div class="lc-title">Sensex Live</div>
+          <div class="lc-sub">BSE Sensex chart & data</div>
+        </div>
+        <div class="lc-arr">↗</div>
+      </a>
+      <a class="link-card" href="https://www.goodreturns.in/stocks/bulk-deals.html" target="_blank">
+        <div class="lc-icon">💼</div>
+        <div class="lc-body">
+          <div class="lc-title">BSE Bulk Deals</div>
+          <div class="lc-sub">Institutional trades on BSE today</div>
+        </div>
+        <div class="lc-arr">↗</div>
+      </a>
+    </div>
+    <div class="news-sec" id="ns-global">
+      <a class="link-card" href="https://www.moneycontrol.com/markets/global-indices/" target="_blank">
+        <div class="lc-icon">🌍</div>
+        <div class="lc-body">
+          <div class="lc-title">Global Indices</div>
+          <div class="lc-sub">Dow, Nasdaq, Nikkei, Hang Seng</div>
+        </div>
+        <div class="lc-arr">↗</div>
+      </a>
+      <a class="link-card" href="https://economictimes.indiatimes.com/markets/forex" target="_blank">
+        <div class="lc-icon">💱</div>
+        <div class="lc-body">
+          <div class="lc-title">Forex & Currency</div>
+          <div class="lc-sub">ET Forex — USD/INR and more</div>
+        </div>
+        <div class="lc-arr">↗</div>
+      </a>
+      <a class="link-card" href="https://trendlyne.com/macro-data/fii-dii/latest/" target="_blank">
+        <div class="lc-icon">🏦</div>
+        <div class="lc-body">
+          <div class="lc-title">FII / DII Data</div>
+          <div class="lc-sub">Foreign & domestic institutional flows</div>
+        </div>
+        <div class="lc-arr">↗</div>
+      </a>
+    </div>
+    <div class="news-sec" id="ns-comm">
+      <a class="link-card" href="https://groww.in/commodities/futures/mcx_crudeoil" target="_blank">
+        <div class="lc-icon">🛢️</div>
+        <div class="lc-body">
+          <div class="lc-title">Crude Oil — MCX</div>
+          <div class="lc-sub">Live crude oil price via Groww</div>
+        </div>
+        <div class="lc-arr">↗</div>
+      </a>
+      <a class="link-card" href="https://groww.in/commodities/futures/mcx_gold" target="_blank">
+        <div class="lc-icon">🥇</div>
+        <div class="lc-body">
+          <div class="lc-title">Gold — MCX</div>
+          <div class="lc-sub">Live gold price via Groww</div>
+        </div>
+        <div class="lc-arr">↗</div>
+      </a>
+      <a class="link-card" href="https://in.investing.com/commodities/crude-oil" target="_blank">
+        <div class="lc-icon">📉</div>
+        <div class="lc-body">
+          <div class="lc-title">WTI Crude — Global</div>
+          <div class="lc-sub">International crude oil price</div>
+        </div>
+        <div class="lc-arr">↗</div>
+      </a>
+      <a class="link-card" href="https://www.moneycontrol.com/commodity/gold-price.html" target="_blank">
+        <div class="lc-icon">✨</div>
+        <div class="lc-body">
+          <div class="lc-title">Gold & Silver News</div>
+          <div class="lc-sub">Moneycontrol commodity prices</div>
+        </div>
+        <div class="lc-arr">↗</div>
+      </a>
+    </div>
+  </div>
+
+  <!-- SETTINGS -->
+  <div class="screen" id="s-settings">
+    <div class="back-header">
+      <button class="back-btn" onclick="goBack()">←</button>
+      <div class="back-title">⚙️ Settings</div>
+    </div>
+    <div class="capital-card">
+      <div class="cap-row">
+        <span class="cap-l">Starting Capital</span>
+        <div style="display:flex;align-items:center;gap:8px">
+          <span class="cap-v" id="settingsCap" style="color:var(--text2)">₹1,50,000</span>
+          <button onclick="editCapSettings()"
+            style="background:var(--border2);border:none;color:var(--text3);font-size:11px;padding:3px 8px;border-radius:5px;cursor:pointer">Edit</button>
+        </div>
+      </div>
+      <div id="editCapRowSettings" style="display:none;margin-bottom:8px">
+        <div style="display:flex;gap:8px">
+          <input type="number" id="capInputSettings" placeholder="Enter capital" style="flex:1">
+          <button onclick="saveCapSettings()"
+            style="background:var(--green);border:none;color:#fff;font-size:12px;padding:8px 12px;border-radius:8px;cursor:pointer;font-weight:600">Save</button>
+        </div>
+      </div>
+      <div class="cap-row"><span class="cap-l">Monthly Goal</span><span class="cap-v"
+          style="color:var(--accent)">₹30,000</span></div>
+    </div>
+  </div>
+
+  <!-- EXPLANATION OVERLAY -->
+  <div class="overlay" id="expOverlay" onclick="closeExp(event)">
+    <div class="exp-sheet">
+      <div class="exp-close">
+        <div class="exp-close-bar"></div>
+      </div>
+      <div class="exp-icon" id="expIcon"></div>
+      <div class="exp-title" id="expTitle"></div>
+      <div class="exp-body" id="expBody"></div>
+      <a class="exp-btn" id="expBtn" href="#" target="_blank">Open →</a>
+    </div>
+  </div>
+
+  <!-- HELP OVERLAY (closes popup on outside click) -->
+  <div class="help-overlay" id="helpOverlay" onclick="closeHelp()"></div>
+
+  <!-- HELP POPUP -->
+  <div class="help-popup" id="helpPopup">
+    <button class="help-item" onclick="toggleAI();closeHelp();"
+      style="background:rgba(245,158,11,0.08);border-color:rgba(245,158,11,0.3);">
+      <div class="help-item-icon">🤖</div>
+      <div class="help-item-body">
+        <div class="help-item-title">Claude AI Teacher</div>
+        <div class="help-item-sub">Ask trading doubts with prebuilt questions</div>
+      </div>
+    </button>
+    <a class="help-item" href="https://notebooklm.google.com" target="_blank" onclick="closeHelp()"
+      style="background:rgba(26,115,232,0.08);border-color:rgba(26,115,232,0.3);">
+      <div class="help-item-icon">📓</div>
+      <div class="help-item-body">
+        <div class="help-item-title">NotebookLM</div>
+        <div class="help-item-sub">Deep research — upload PDFs & books</div>
+      </div>
+    </a>
+  </div>
+
+  <!-- AI PANEL -->
+  <!-- AI PANEL -->
+  <div class="ai-panel" id="aiPanel">
+    <div class="ai-header">
+      <button class="ai-back" onclick="toggleAI()">←</button>
+      <div>
+        <div class="ai-title">AI Trading Teacher</div>
+        <div style="font-size:10px;color:var(--text3);font-family:'JetBrains Mono',monospace;">Ask me anything about
+          trading!</div>
+      </div>
+      <div class="ai-badge">Claude AI</div>
+    </div>
+    <div class="ai-messages" id="aiMessages">
+      <div class="ai-msg bot">👋 Hi Ranjith! I'm your AI Trading Teacher. Ask me anything about trading, markets, charts
+        or investing. I'll explain simply! 📈</div>
+    </div>
+    <div class="ai-suggestions">
+      <div class="ai-sug" onclick="askAI('What is volume in trading and how do I check it in Groww?')">What is volume?
+      </div>
+      <div class="ai-sug" onclick="askAI('How to identify uptrend and downtrend in a stock chart?')">How to find trend?
+      </div>
+      <div class="ai-sug" onclick="askAI('What is Stop Loss and how to set it in Groww?')">What is Stop Loss?</div>
+      <div class="ai-sug" onclick="askAI('How does FII buying and selling affect Indian stock market?')">FII buying
+        effect?</div>
+      <div class="ai-sug" onclick="askAI('What is GIFT Nifty and why should I check it before trading?')">What is GIFT
+        Nifty?</div>
+      <div class="ai-sug" onclick="askAI('How to read a candlestick chart as a beginner in Indian stock market?')">
+        Candlestick charts?</div>
+      <div class="ai-sug" onclick="askAI('How to find good stocks to trade intraday in Indian market?')">Find good
+        stocks?</div>
+      <div class="ai-sug" onclick="askAI('What is the difference between intraday and swing trading?')">Intraday vs
+        Swing?</div>
+    </div>
+    <div class="ai-input-row">
+      <input class="ai-input" id="aiInput" placeholder="Ask your trading doubt..."
+        onkeydown="if(event.key==='Enter')sendAI()">
+      <button class="ai-send" onclick="sendAI()">↑</button>
+    </div>
+  </div>
+  <!-- AI PANEL -->
+  <div class="ai-panel" id="aiPanel">
+    <div class="ai-header">
+      <button class="ai-back" onclick="toggleAI()">←</button>
+      <div>
+        <div class="ai-title">🤖 Trading Teacher</div>
+        <div style="font-size:10px;color:var(--text3);font-family:'JetBrains Mono',monospace;">Powered by Claude AI ·
+          Anthropic</div>
+      </div>
+      <div class="ai-badge">LIVE AI</div>
+    </div>
+    <div class="ai-messages" id="aiMessages">
+      <div class="ai-msg bot">👋 Hi Ranjith! I'm your AI Trading Teacher. Ask me anything about trading — volume,
+        trends, stop loss, FII data, chart reading. I'll explain simply in Indian context! 📈</div>
+    </div>
+    <div class="ai-suggestions">
+      <div class="ai-sug" onclick="askAI('What is volume in trading and how to check it in Groww?')">What is volume?
+      </div>
+      <div class="ai-sug" onclick="askAI('How to identify uptrend and downtrend in a stock chart?')">How to find trend?
+      </div>
+      <div class="ai-sug" onclick="askAI('What is Stop Loss and how to set it in Groww for intraday trading?')">How to
+        set Stop Loss?</div>
+      <div class="ai-sug" onclick="askAI('How does FII buying and selling affect Nifty and Indian stocks?')">FII impact?
+      </div>
+      <div class="ai-sug" onclick="askAI('What is GIFT Nifty and how to use it before market opens at 9:15 AM?')">What
+        is GIFT Nifty?</div>
+      <div class="ai-sug" onclick="askAI('How to read a candlestick chart for beginners in Indian stock market?')">
+        Candlestick charts?</div>
+      <div class="ai-sug" onclick="askAI('What is the difference between intraday and swing trading?')">Intraday vs
+        Swing?</div>
+      <div class="ai-sug" onclick="askAI('How to calculate position size to limit loss to Rs 3000 per trade?')">Position
+        sizing?</div>
+    </div>
+    <div class="ai-input-row">
+      <input class="ai-input" id="aiInput" placeholder="Ask your trading doubt..."
+        onkeydown="if(event.key==='Enter')sendAI()">
+      <button class="ai-send" onclick="sendAI()">↑</button>
+    </div>
+  </div>
+  <!-- AI PANEL — Teacher inside app -->
+  <div class="ai-panel" id="aiPanel">
+    <div class="ai-header">
+      <button class="ai-back" onclick="toggleAI()">←</button>
+      <div>
+        <div class="ai-title">🎓 Trading Teacher</div>
+        <div style="font-size:10px;color:var(--text3);font-family:'JetBrains Mono',monospace;">Ask any trading doubt
+        </div>
+      </div>
+      <div class="ai-badge">Claude AI ✦</div>
+    </div>
+    <div class="ai-messages" id="aiMessages">
+      <div class="ai-msg bot">👋 Hi Ranjith! I'm your Trading Teacher powered by Claude AI.<br><br>Ask me anything about
+        trading — volume, trends, stop loss, FII/DII, charts, or any doubt you have! I'll explain simply in Indian
+        market context! 📈</div>
+    </div>
+    <div class="ai-suggestions">
+      <div class="ai-sug" onclick="askAI('What is volume in trading and how do I check it in Groww?')">What is volume?
+      </div>
+      <div class="ai-sug" onclick="askAI('How to identify a trend in stocks using 15 min chart?')">How to find trend?
+      </div>
+      <div class="ai-sug" onclick="askAI('What is Stop Loss and how to set it in Groww for intraday?')">Stop Loss in
+        Groww?</div>
+      <div class="ai-sug" onclick="askAI('How does FII buying affect Indian stock market?')">FII buying effect?</div>
+      <div class="ai-sug" onclick="askAI('What is GIFT Nifty and how to use it before market opens?')">What is GIFT
+        Nifty?</div>
+      <div class="ai-sug" onclick="askAI('How to read candlestick charts for beginners in Indian market?')">Candlestick
+        charts?</div>
+      <div class="ai-sug" onclick="askAI('What is the difference between intraday and swing trading?')">Intraday vs
+        Swing?</div>
+      <div class="ai-sug" onclick="askAI('How to calculate position size for a trade with ₹1.5 lakh capital?')">Position
+        sizing?</div>
+      <div class="ai-sug" onclick="askAI('What is support and resistance in stock charts?')">Support & Resistance?</div>
+      <div class="ai-sug" onclick="askAI('How to avoid buying a stock that has already gone up 3x today?')">Avoid 3x
+        traps?</div>
+    </div>
+    <div class="ai-input-row">
+      <input class="ai-input" id="aiInput" placeholder="Type your trading doubt here..."
+        onkeydown="if(event.key==='Enter')sendAI()">
+      <button class="ai-send" onclick="sendAI()">↑</button>
+    </div>
+  </div>
+
+  <!-- BOTTOM NAV -->
+  <div class="bottom-nav">
+    <button class="nb active" onclick="nav('home',this)">🏠<span>Home</span></button>
+    <button class="nb" onclick="nav('night',this)">🌙<span>Night</span></button>
+    <button class="nb" onclick="nav('morning',this)">🌅<span>Morn</span></button>
+    <button class="nb" onclick="nav('check',this)">✅<span>Check</span></button>
+    <button class="nb" onclick="toggleHelp(this)">💡<span>Help</span></button>
+  </div>
+
+  <script>
+    // ── STATE ────────────────────────────────────────────
+    const today = new Date().toDateString();
+    if (localStorage.getItem('lastDay') !== today) {
+      localStorage.setItem('nightDone', '[]');
+      localStorage.setItem('mornDone', '[]');
+      localStorage.setItem('checkDone', '[]');
+      localStorage.setItem('lastDay', today);
+    }
+    let nightDone = JSON.parse(localStorage.getItem('nightDone') || '[]');
+    let mornDone = JSON.parse(localStorage.getItem('mornDone') || '[]');
+    let checkDone = JSON.parse(localStorage.getItem('checkDone') || '[]');
+    let watchlist = JSON.parse(localStorage.getItem('watchlist') || '[]');
+    let trades = JSON.parse(localStorage.getItem('trades') || '[]');
+    let startCap = parseInt(localStorage.getItem('startCap') || '150000');
+
+    // ── STEPS ────────────────────────────────────────────
+    const NIGHT = [
+      {
+        id: 'n1', name: 'Results Calendar', sub: "Check tomorrow's earnings announcements", url: 'https://trendlyne.com/equity/calendar/all/all/', lbl: 'Trendlyne Calendar', icon: '📅',
+        exp: `<strong>📅 Results Calendar — How to Use It to Make Money</strong><br><br>Every 3 months companies announce profits. This creates the BIGGEST single-day moves in stocks!<br><br><strong>Step 1 — Open Trendlyne Calendar tonight</strong><br>See which companies announce results TOMORROW<br><br><strong>Step 2 — Filter good companies only</strong><br>• Large caps: SBI, TCS, Reliance, HDFC, Infosys<br>• Mid caps you recognise<br>• Ignore small unknown companies<br><br><strong>Step 3 — Research that company (10 mins)</strong><br>• Google: "[Company] Q4 results expectations"<br>• Is market expecting good or bad results?<br>• Check last 3 quarters — improving or declining?<br><br><strong>Step 4 — Decide your plan</strong><br>• Good results expected + Stock in uptrend = Watch for BUY after results<br>• Bad results expected = AVOID completely<br>• Uncertain = Wait for results, then decide<br><br><div class="tip">⚠️ <strong>WARNING — Never buy BEFORE results!</strong><br>Results are unpredictable. Even if results are good, stock can fall if market expected better. ALWAYS wait for results to come out, then buy on confirmation!</div><div class="tip">🎯 Best strategy: Results come at 3:30 PM or after market. Stock gaps up next morning. You buy on the gap up with stop loss. Clean trade!</div>`
+      },
+
+      {
+        id: 'n2', name: 'Volume Shockers', sub: 'Find stocks with abnormally high volume today', url: 'https://trendlyne.com/stock-screeners/volume-based/high-volume-stocks/top-gainers/today/', lbl: 'Volume Shockers', icon: '📊',
+        exp: `<strong>📊 Volume Shockers — The Right Way to Research</strong><br><br>High volume = big players are active. But you must research BEFORE buying. This is how Vinal-type losses happen — people buy without research!<br><br><strong>Step 1 — Open Volume Shockers page</strong><br>See stocks with unusually high volume today<br><br><strong>Step 2 — Check if move is FRESH or DONE</strong><br>• Stock up 0-5% today = Fresh move, worth researching<br>• Stock up 5-10% = Risky, be careful<br>• Stock already up 10%+ today = <strong style="color:#ef4444">SKIP! Move is done!</strong><br>• Stock already up 2x, 3x = <strong style="color:#ef4444">NEVER BUY! You will lose!</strong><br><br><strong>Step 3 — Find WHY volume is high</strong><br>Google: "[Stock name] news today"<br>• Good news = results, big order, FII buying = Valid reason<br>• No news found = DANGER! Could be pump & dump. Skip!<br><br><strong>Step 4 — Check the chart (15 min)</strong><br>Open Groww → Stock chart → Change to 15 min<br>• Is it making higher highs? = Uptrend, good<br>• Is it falling after initial spike? = Trap! Avoid!<br><br><strong>Step 5 — Note it for TOMORROW</strong><br>If today's move is already big → Add to watchlist for tomorrow<br>Fresh entry next day after pullback = safer and more profit<br><br><div class="tip">⚠️ <strong>THE VINAL LESSON — Never forget this!</strong><br>Stock at ₹100 → Shoots to ₹300 today (3x) → You buy at ₹300 excited → Big players sell → Stock falls to ₹180 → You lose ₹120 per share!<br><br>🎯 Rule: If stock moved more than 8% today → Put in watchlist. Buy TOMORROW on fresh move with proper entry + stop loss!</div>`
+      },
+
+      {
+        id: 'n3', name: 'Block & Bulk Deals', sub: 'See what big institutions bought/sold today', url: 'https://www.nseindia.com/report-detail/display-bulk-and-block-deals', lbl: 'NSE Block Deals', icon: '🏦',
+        exp: `<strong>🏦 Block & Bulk Deals — Follow Smart Money</strong><br><br>Big institutions — mutual funds, FIIs, insurance companies — buy/sell crores of shares. They have research teams and insider knowledge. Following them is smart!<br><br><strong>Step 1 — Open NSE Block Deals page tonight</strong><br>You'll see a table of large trades done today<br><br><strong>Step 2 — Read the table correctly</strong><br>Columns: Company | Buyer/Seller | Buy or Sell | Price | Quantity<br>• <strong style="color:#22c55e">Buy</strong> = Institution is confident → Bullish signal<br>• <strong style="color:#ef4444">Sell</strong> = Institution is exiting → Bearish signal<br><br><strong>Step 3 — Filter quality deals</strong><br>• Look for well-known buyers: Mutual funds, FIIs, LIC<br>• Large quantity (1 lakh+ shares) = Strong conviction<br>• Multiple buyers buying same stock = Very bullish!<br><br><strong>Step 4 — Research the stock</strong><br>• Google the company name + "news"<br>• Why is institution buying? Any upcoming catalyst?<br>• Check chart — is it in uptrend?<br><br><strong>Step 5 — Add to watchlist</strong><br>If big institution bought today → Watch for entry tomorrow<br><br><div class="tip">💡 <strong>Real Example:</strong><br>LIC buys 50 lakh shares of SBI today → SBI likely goes up tomorrow<br>Add SBI to watchlist → Check chart at 9:15 AM → If gap up with volume → BUY with SL below gap!</div><div class="tip">🎯 Block deals are one of the most reliable signals. Big players buy for a reason. You just need to follow them carefully!</div>`
+      },
+
+      {
+        id: 'n4', name: 'Market News Scan', sub: "Read tonight's important market headlines", url: 'https://economictimes.indiatimes.com/markets', lbl: 'ET Markets', icon: '📰',
+        exp: `<strong>📰 Market News — What to Read and How to Use It</strong><br><br>Most traders skip news. That's why they get surprised by sudden moves. 10 minutes of news reading = better trades tomorrow!<br><br><strong>Step 1 — Open ET Markets tonight</strong><br>Read the top 5-10 headlines only. Don't read full articles.<br><br><strong>Step 2 — Categorise what you read</strong><br><br>🌍 <strong>Global News:</strong><br>• US market fell → India likely opens red tomorrow<br>• Crude oil up → Aviation (IndiGo, SpiceJet) stocks fall<br>• US Fed raised rates → All markets cautious<br><br>🏛️ <strong>Government/Policy News:</strong><br>• New infrastructure project → Construction stocks up<br>• Tax change → Affected sector moves<br>• RBI rate cut → Bank stocks go up<br><br>🏢 <strong>Company News:</strong><br>• Big order win → Stock goes up<br>• Promoter selling shares → Red flag! Avoid<br>• Results announced → Research and plan entry<br><br><strong>Step 3 — Note 1-2 stocks for tomorrow's watchlist</strong><br>Based on news, which stock might move tomorrow?<br>Write it down with reason!<br><br><div class="tip">💡 <strong>Sector connections to remember:</strong><br>• Crude up = Bad for Airlines, Paint, Tyres<br>• Crude down = Good for Airlines, Paint, Tyres<br>• Rupee weak = Good for IT (TCS, Infosys, Wipro)<br>• Rate cut = Good for Banks, Real Estate<br>• Good monsoon forecast = Good for FMCG, Agri stocks</div><div class="tip">🎯 Goal: End your night routine with a clear list of 2-3 stocks to watch tomorrow morning!</div>`
+      },
+    ];
+
+    const MORN = [
+      {
+        id: 'm1', name: 'GIFT Nifty Check (SGX)', sub: 'Where will Indian market open today?', url: 'https://groww.in/indices/global-indices/sgx-nifty', lbl: 'GIFT Nifty on Groww', icon: '🌏',
+        exp: `<strong>🌏 GIFT Nifty — Your First Signal of the Day</strong><br><br>GIFT Nifty (previously called SGX Nifty) trades in Gujarat from 6:30 AM. It shows where Indian market will open BEFORE NSE opens at 9:15 AM!<br><br><strong>How to read GIFT Nifty:</strong><br><br>📈 <strong>GIFT Nifty UP 50-100 points:</strong><br>• Market opens slightly positive<br>• Good day to look for BUY trades<br>• Check your watchlist stocks<br><br>📈 <strong>GIFT Nifty UP 150+ points:</strong><br>• Strong gap up opening<br>• Many stocks open 2-3% higher<br>• Wait for 9:30 AM to confirm trend before buying<br><br>📉 <strong>GIFT Nifty DOWN 50-100 points:</strong><br>• Market opens slightly weak<br>• Be cautious, wait for stability<br><br>📉 <strong>GIFT Nifty DOWN 200+ points:</strong><br>• Big gap down opening — HIGH RISK day<br>• Wait till 10 AM for market to settle<br>• Beginners should avoid trading on such days<br><br>➡️ <strong>GIFT Nifty FLAT (±30 points):</strong><br>• Normal day, follow your plan<br>• Best day for beginners to trade<br><br><div class="tip">🎯 Best time to check: 8:00 AM to 9:00 AM<br>This sets your entire trading mood for the day. If GIFT Nifty is very negative — reduce your trade size or skip trading!</div>`
+      },
+
+      {
+        id: 'm2', name: 'Global Markets', sub: 'Check Dow, Nasdaq, Crude oil overnight', url: 'https://www.moneycontrol.com/markets/global-indices/', lbl: 'Global Markets', icon: '🌍',
+        exp: `<strong>🌍 Global Markets — How They Impact Your Trades</strong><br><br>India is connected to the world. US market closes at 1:30 AM IST. Whatever happens there directly affects India's opening!<br><br><strong>What to check every morning:</strong><br><br>🇺🇸 <strong>Dow Jones / Nasdaq (US Markets):</strong><br>• Closed UP = India likely opens GREEN ✅<br>• Closed DOWN = India likely opens RED ❌<br>• Rule of thumb: India follows US by 50-70%<br><br>🛢️ <strong>Crude Oil (Brent):</strong><br>• Crude UP sharply = Bad for India (we import oil)<br>• Stocks affected: IndiGo ↓, Asian Paints ↓, Tyre stocks ↓<br>• Stocks benefited: ONGC ↑, Oil India ↑<br><br>🥇 <strong>Gold:</strong><br>• Gold UP = Market is scared/uncertain<br>• If gold rising daily = Be cautious in market<br><br>💵 <strong>Dollar vs Rupee (USD/INR):</strong><br>• Dollar strong (Rupee weak) = IT stocks go UP (TCS, Infosys, Wipro earn in dollars!)<br>• Dollar weak (Rupee strong) = IT stocks fall slightly<br><br><div class="tip">💡 Quick 2-minute morning check:<br>1. US green? → Be positive<br>2. Crude up 3%+? → Avoid aviation/paint stocks today<br>3. Dollar up? → Check IT stocks for opportunity</div><div class="tip">🎯 This 2-minute check can save you from 3-4 wrong trades every week!</div>`
+      },
+
+      {
+        id: 'm3', name: 'NSE Pre-Open Market', sub: 'Which stocks are gapping up/down today?', url: 'https://www.nseindia.com/market-data/pre-open-market-cm-and-emerge-market', lbl: 'NSE Pre-Open', icon: '⚡',
+        exp: `<strong>⚡ Pre-Open Market — Find Tomorrow's Opportunities</strong><br><br>From 9:00 to 9:15 AM, NSE runs a special session where the opening prices are decided. This is a goldmine of information!<br><br><strong>How to use it (open at 9:05-9:10 AM):</strong><br><br><strong>Step 1 — Sort by % Change (high to low)</strong><br>You'll see stocks sorted by gap up/gap down<br><br><strong>Step 2 — Understand what you see</strong><br>📈 <strong>Gap UP stocks (opening higher than yesterday):</strong><br>• Positive news overnight<br>• Results were good<br>• Institutional buying<br>• = Possible BUY candidate<br><br>📉 <strong>Gap DOWN stocks (opening lower than yesterday):</strong><br>• Bad news overnight<br>• Poor results<br>• = AVOID for buying, watch for recovery later<br><br><strong>Step 3 — Research the gap up stocks</strong><br>• Google the stock name + "news today"<br>• Is the reason strong? (results, order, FII buying)<br>• Add to your watchlist with entry plan<br><br><strong>Step 4 — Plan your entry (NOT in pre-open!)</strong><br>• NEVER buy in pre-open (9:00-9:15)<br>• Wait for market to open at 9:15<br>• Buy only if stock confirms the move with volume<br><br><div class="tip">⚠️ <strong>Gap Up Trading Rule:</strong><br>• Small gap up (1-2%) + News + Volume = BUY after 9:20 AM<br>• Big gap up (5%+) = Wait! Stock may fall after initial spike. Buy only on pullback!</div><div class="tip">🎯 The best intraday trades come from stocks with moderate gap up + strong news + high volume after open!</div>`
+      },
+
+      {
+        id: 'm4', name: 'FII / DII Activity', sub: 'Are big investors buying or selling today?', url: 'https://trendlyne.com/macro-data/fii-dii/latest/', lbl: 'FII DII Data', icon: '💰',
+        exp: `<strong>💰 FII / DII Activity — The Market Mood Indicator</strong><br><br>Every day FIIs and DIIs buy/sell crores of shares. Their combined activity decides the market direction!<br><br><strong>Who are they?</strong><br>🌍 <strong>FII (Foreign Institutional Investors)</strong><br>= JP Morgan, Goldman Sachs, Tiger Global<br>They manage billions of dollars globally<br><br>🇮🇳 <strong>DII (Domestic Institutional Investors)</strong><br>= LIC, SBI Mutual Fund, HDFC MF<br>They invest Indian retail investors' money (your SIP!)<br><br><strong>How to read the numbers:</strong><br><br>✅ <strong>FII Buying ₹1000cr+:</strong> Bullish! Foreign money coming in → Market likely UP<br>✅ <strong>FII Buying ₹2000cr+:</strong> Very bullish! Strong rally possible<br>⚠️ <strong>FII Selling ₹1000cr+:</strong> Caution! Foreign money leaving → Market may fall<br>❌ <strong>FII Selling ₹3000cr+:</strong> Bearish! Avoid new trades today<br><br><strong>FII vs DII battle:</strong><br>• FII selling + DII buying = Market stable, slight fall<br>• FII selling + DII also selling = Market falls hard! Stay away<br>• FII buying + DII buying = Market rallies strongly! Best day to trade<br><br><div class="tip">🎯 <strong>The Pattern:</strong><br>If FII buys for 3-5 consecutive days → Very strong rally coming!<br>If FII sells for 3-5 consecutive days → Market correction coming!<br>Check this every morning for the trend!</div>`
+      },
+
+      {
+        id: 'm5', name: 'Open Groww & Final Plan', sub: 'Review watchlist and set your plan for today', url: 'https://groww.in', lbl: 'Open Groww', icon: '📱',
+        exp: `<strong>📱 Final Pre-Market Check — Your Trading Plan</strong><br><br>You've done all your research. Now convert it into a clear trading plan before 9:15 AM!<br><br><strong>Step 1 — Open Groww, go to your Watchlist</strong><br>Check each stock you shortlisted last night<br><br><strong>Step 2 — For each stock, decide 4 things:</strong><br>• Entry price: ₹_____<br>• Target price: ₹_____<br>• Stop Loss: ₹_____<br>• Max qty (so loss ≤ ₹3,000): _____<br><br><strong>Step 3 — Check pre-open price</strong><br>• Is it near your entry? Good, ready to trade<br>• Opened way above your entry? Skip, too risky<br>• Opened way below? Wait, something changed overnight<br><br><strong>Step 4 — Set price alerts in Groww</strong><br>Set alert at your entry price so you don't miss it<br><br><strong>Step 5 — Decide today's max loss</strong><br>I will stop trading today if total loss reaches ₹_____<br>(Recommended: ₹2,000-₹3,000 max per day)<br><br><div class="tip">⚠️ <strong>GOLDEN RULE:</strong><br>If you don't have a clear Entry + Target + Stop Loss for a stock by 9:10 AM → DO NOT TRADE IT TODAY!<br>Trading without a plan = Gambling. Gambling = Losses!</div><div class="tip">🎯 Remember: ₹30,000/month = only ₹1,364/day. That's just 2 good trades. You don't need to trade every stock every day!</div>`
+      },
+    ];
+
+    const CHECKS = [
+      {
+        id: 'c1', label: 'Is there high volume in this stock?', icon: '📊',
+        exp: `<strong>📊 How to Check Volume in Groww</strong><br><br>Volume tells you if real money is behind this move or if it's just noise!<br><br><strong>Step by step in Groww:</strong><br>1. Open the stock<br>2. Scroll to the chart<br>3. Look at the BARS at the bottom of chart<br>4. Compare today's bar height to previous days<br><br><strong>What you see:</strong><br>• Today's bar TALLER than recent days = High volume ✅<br>• Today's bar SHORTER than recent days = Low volume ❌<br><br><strong>Volume Rules:</strong><br>✅ Volume 2x average = Good signal, worth trading<br>✅ Volume 5x average = Very strong signal<br>❌ Volume below average = Skip this trade completely<br><br><div class="tip">⚠️ <strong>Volume + Price together:</strong><br>• High volume + Price going UP = Strong BUY signal ✅<br>• High volume + Price going DOWN = Strong SELL signal, avoid buying<br>• Low volume + Price going up = Weak move, could reverse anytime ❌</div><div class="tip">🎯 Never trade a stock with low volume. You cannot exit easily and price can swing wildly against you!</div>`
+      },
+
+      {
+        id: 'c2', label: 'Is the trend supporting my trade?', icon: '📈',
+        exp: `<strong>📈 How to Check Trend in Groww</strong><br><br>Always trade in the direction of the trend. Fighting the trend = losing money!<br><br><strong>Step by step in Groww:</strong><br>1. Open the stock chart<br>2. Change timeframe to 15 minutes<br>3. Look at the last 2-3 hours of candles<br><br><strong>Identifying the trend:</strong><br><br>✅ <strong>Uptrend (BUY):</strong><br>Each high is higher than previous high<br>Each low is higher than previous low<br>Chart going up-right direction overall<br><br>❌ <strong>Downtrend (AVOID BUYING):</strong><br>Each high is lower than previous high<br>Each low is lower than previous low<br>Chart going down-right direction<br><br>⚠️ <strong>Sideways (WAIT):</strong><br>Stock moving in same range, no clear direction<br>Avoid as beginner — unpredictable!<br><br><strong>Simple visual check:</strong><br>Draw an imaginary line through the chart.<br>Going up? = Uptrend. Going down? = Downtrend.<br><br><div class="tip">🎯 <strong>One rule that saves money:</strong><br>ONLY buy in uptrend. ONLY sell in downtrend.<br>If you can't clearly see an uptrend → DO NOT BUY. Wait for clarity!<br><br>Unclear chart = skip the trade. Another opportunity will come tomorrow!</div>`
+      },
+
+      {
+        id: 'c3', label: 'Is my Stop Loss decided and set?', icon: '🛑',
+        exp: `<strong>🛑 How to Set Stop Loss in Groww</strong><br><br>Stop Loss is the most important discipline in trading. It protects your capital when you're wrong!<br><br><strong>How to calculate Stop Loss:</strong><br><br>For INTRADAY trade:<br>• Entry at ₹500<br>• Stop Loss = 1-2% below entry = ₹490-₹495<br>• Never more than 2% away from entry<br><br>For SWING trade:<br>• Entry at ₹500<br>• Stop Loss = Below last support level<br>• Example: If stock bounced from ₹480 twice → SL = ₹478<br><br><strong>How to calculate position size:</strong><br>Max loss = ₹3,000<br>Risk per share = Entry - Stop Loss = ₹500 - ₹490 = ₹10<br>Quantity = ₹3,000 ÷ ₹10 = 300 shares<br>Investment = 300 × ₹500 = ₹1,50,000<br><br><strong>How to place Stop Loss in Groww:</strong><br>1. Open stock → Tap Buy<br>2. Select order type: SL-M (Stop Loss Market)<br>3. Enter trigger price = your stop loss price<br>4. If stock hits that price → Auto exit!<br><br><div class="tip">⚠️ <strong>NEVER do this:</strong><br>When stock is falling and hitting your SL → Do NOT move SL lower to avoid loss!<br>Moving SL = small loss becomes BIG loss. Respect your stop loss always!</div><div class="tip">🎯 Trading with stop loss = losing small sometimes, winning big overall. No stop loss = one bad trade can wipe your entire capital!</div>`
+      },
+
+      {
+        id: 'c4', label: "Have I checked today's news for this stock?", icon: '📰',
+        exp: `<strong>📰 How to Check Stock News in 2 Minutes</strong><br><br>News can make or break a trade. One bad news while you're holding = 10-15% loss in minutes!<br><br><strong>Quick 2-minute news check:</strong><br><br>1. Google: "[Stock name] news today"<br>Look at headlines from last 24 hours<br><br>2. Check NSE announcements:<br>nseindia.com → Companies → Announcements → Search stock<br>Any results, board meetings, dividends, bulk deals?<br><br>3. Check ET Markets app:<br>Search the stock → News tab<br>Any analyst upgrades/downgrades?<br><br><strong>What to look for — RED FLAGS (avoid trading):</strong><br>❌ Promoter pledging or selling shares<br>❌ SEBI investigation or legal issues<br>❌ Profit warning or bad quarterly numbers<br>❌ Key management person resigning<br>❌ Company defaulting on loans<br><br><strong>What to look for — GREEN FLAGS (good to trade):</strong><br>✅ Big new order or contract win<br>✅ Strong quarterly results<br>✅ FII buying or block deal buy<br>✅ New product launch or expansion<br>✅ Government contract or approval<br><br><div class="tip">🎯 Formula: Good news + Good chart + High volume = High probability trade!<br>Bad news + Any chart = DO NOT TRADE. News always wins over chart!</div>`
+      },
+
+      {
+        id: 'c5', label: 'Is my risk calculated? (Max ₹3,000/trade)', icon: '💰',
+        exp: `<strong>💰 Risk Calculation — The Formula for Consistent Profits</strong><br><br>You have ₹1.5 lakh capital. Your goal is ₹30,000/month. But the path to profit is PROTECTING CAPITAL first!<br><br><strong>The 2% Rule — Your Most Important Rule:</strong><br>Never risk more than 2% of capital in one trade<br>2% of ₹1,50,000 = ₹3,000 maximum loss per trade<br><br><strong>Position Size Formula (memorise this!):</strong><br>Max Loss = ₹3,000<br>Risk per share = Entry price - Stop Loss price<br>Quantity = Max Loss ÷ Risk per share<br><br><strong>Example 1 — Tight SL:</strong><br>Entry ₹200, SL ₹195 → Risk = ₹5/share<br>Qty = ₹3,000 ÷ ₹5 = 600 shares<br>Investment = 600 × ₹200 = ₹1,20,000<br><br><strong>Example 2 — Wider SL:</strong><br>Entry ₹500, SL ₹480 → Risk = ₹20/share<br>Qty = ₹3,000 ÷ ₹20 = 150 shares<br>Investment = 150 × ₹500 = ₹75,000<br><br><strong>Daily target math:</strong><br>₹30,000 ÷ 22 trading days = ₹1,364/day<br>Just 2 trades of ₹700 each = Daily goal done!<br><br><div class="tip">⚠️ <strong>If you lose ₹3,000 in first trade of the day:</strong><br>STOP TRADING for that day. Come back tomorrow.<br>Revenge trading after a loss = Bigger losses guaranteed!</div><div class="tip">🎯 Math of consistent trading:<br>Win rate 50% + Risk:Reward 1:2 = Profitable trader!<br>Meaning: Even if you lose 5 trades and win 5 trades, you still make money because winners are 2x bigger than losers!</div>`
+      },
+    ];
+
+    // ── MARKET STATE ─────────────────────────────────
+    let mktState = JSON.parse(localStorage.getItem('mktState') || '{"mode":"pre"}');
+
+    function saveMktState() {
+      localStorage.setItem('mktState', JSON.stringify(mktState));
+    }
+
+    function refreshTime() {
+      const now = new Date().toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit', timeZone: 'Asia/Kolkata' });
+      // Show toast feedback
+      let toast = document.getElementById('refreshToast');
+      if (!toast) {
+        toast = document.createElement('div');
+        toast.id = 'refreshToast';
+        toast.style.cssText = 'position:fixed;bottom:80px;left:50%;transform:translateX(-50%);background:var(--card2);border:1px solid var(--border2);color:var(--text2);font-size:11px;padding:6px 14px;border-radius:20px;z-index:999;transition:opacity 0.3s;font-family:"JetBrains Mono",monospace;';
+        document.body.appendChild(toast);
+      }
+      toast.textContent = '↻ Refreshed at ' + now + ' IST';
+      toast.style.opacity = '1';
+      clearTimeout(window._toastTimer);
+      window._toastTimer = setTimeout(() => { toast.style.opacity = '0'; }, 2000);
+    }
+
+    function renderMktStrip() { } // kept for compatibility
+
+    function setMode(mode) {
+      mktState.mode = mode;
+      localStorage.setItem('mktState', JSON.stringify(mktState));
+      const pre = document.getElementById('modePreMkt');
+      const live = document.getElementById('modeLive');
+      if (pre && live) {
+        pre.className = mode === 'pre' ? 'mode-btn active' : 'mode-btn';
+        live.className = mode === 'live' ? 'mode-btn active' : 'mode-btn';
+      }
+      const hint = document.getElementById('modeHint');
+      if (hint) hint.textContent = mode === 'pre' ? 'Set before 9:15 AM' : 'Market LIVE — trade with plan!';
+    }
+
+    // ── HEADER ─────────────────────────────────────────
+    function initHeader() {
+      const now = new Date();
+      document.getElementById('topDate').textContent =
+        now.toLocaleDateString('en-IN', { weekday: 'short', day: 'numeric', month: 'short', year: 'numeric', timeZone: 'Asia/Kolkata' });
+      // Force IST timezone
+      const ist = new Date(now.toLocaleString('en-US', { timeZone: 'Asia/Kolkata' }));
+      const m = ist.getHours() * 60 + ist.getMinutes(), w = ist.getDay();
+      const open = w > 0 && w < 6 && m >= 555 && m <= 930;
+      const el = document.getElementById('mktStatus');
+      el.textContent = open ? '● OPEN' : '● CLOSED';
+      el.className = 'mkt-pill ' + (open ? 'pill-open' : 'pill-closed');
+    }
+
+    // ── NAVIGATION ────────────────────────────────────
+    // ── NAVIGATION ────────────────────────────────────
+    const IS_FILE = location.protocol === 'file:';
+
+    function _applyScreen(id) {
+      document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+      const el = document.getElementById('s-' + id);
+      if (el) el.classList.add('active');
+      // Sync bottom nav active state
+      document.querySelectorAll('.nb').forEach(b => b.classList.remove('active'));
+      const mainScreens = ['home', 'night', 'morning', 'check', 'profile'];
+      if (mainScreens.includes(id)) {
+        document.querySelectorAll('.nb').forEach(b => {
+          if (b.getAttribute('onclick') && b.getAttribute('onclick').includes("'" + id + "'"))
+            b.classList.add('active');
+        });
+      }
+      // Trigger data renders
+      if (id === 'profile') renderLog();
+      if (id === 'watchlist') renderWatch();
+      if (id === 'tradelog') { renderLog(); const d = document.getElementById('tDate'); if (d) d.value = new Date().toISOString().split('T')[0]; }
+      if (id === 'settings') updateCapDisplay();
+      if (id === 'dailypnl') renderDailyPnl();
+      if (id === 'review') renderReviews();
+      if (id === 'screener') renderScreener();
+      if (id === 'monthly') renderMonthlyReport();
+      if (id === 'streak') renderStreak();
+      if (id === 'pretrade') renderPtList();
+    }
+
+    function nav(id, btn) {
+      _applyScreen(id);
+      if (!IS_FILE) {
+        try { history.pushState({ screen: id }, '', '#' + id); } catch (e) { }
+      }
+      if (btn) {
+        document.querySelectorAll('.nb').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+      }
+    }
+
+    function showScreen(id) {
+      _applyScreen(id);
+      if (!IS_FILE) {
+        try { history.pushState({ screen: id }, '', '#' + id); } catch (e) { }
+      }
+    }
+
+    function showSub(id) {
+      showScreen(id); // this already calls _applyScreen which handles all renders
+    }
+
+    // Back button handler
+    window.onpopstate = function (e) {
+      if (IS_FILE) {
+        _applyScreen('home');
+        return;
+      }
+      const id = (e.state && e.state.screen) || 'home';
+      _applyScreen(id);
+    };
+
+    function goBack() {
+      if (!IS_FILE) { history.back(); }
+      else { _applyScreen('home'); }
+    }
+
+    // ── EXPLANATION ───────────────────────────────────
+    function openExp(icon, title, body, url, lbl) {
+      document.getElementById('expIcon').textContent = icon;
+      document.getElementById('expTitle').textContent = title;
+      document.getElementById('expBody').innerHTML = body;
+      document.getElementById('expBtn').href = url;
+      document.getElementById('expBtn').textContent = lbl ? '↗ ' + lbl : 'Close';
+      document.getElementById('expOverlay').classList.add('show');
+    }
+    function closeExp(e) {
+      if (e.target === document.getElementById('expOverlay'))
+        document.getElementById('expOverlay').classList.remove('show');
+    }
+    function getExp(id) {
+      return ([...NIGHT, ...MORN, ...CHECKS].find(x => x.id === id) || { exp: '' }).exp;
+    }
+
+    // ── ROUTINES ──────────────────────────────────────
+    function renderSteps(steps, done, listId, cntId, key) {
+      document.getElementById(listId).innerHTML = steps.map(s => {
+        const d = done.includes(s.id);
+        return `<div class="step-card ${d ? 'done' : ''}">
+      <div class="step-top">
+        <button class="chk" onclick="toggleStep('${s.id}','${key}')">${d ? '✓' : ''}</button>
+        <div class="step-info">
+          <div class="step-name" onclick="openExp('${s.icon}','${s.name}',getExp('${s.id}'),'${s.url}','${s.lbl}')">
+            ${s.name} <button class="info-btn" onclick="event.stopPropagation();openExp('${s.icon}','${s.name}',getExp('${s.id}'),'${s.url}','${s.lbl}')">?</button>
+          </div>
+          <div class="step-sub">${s.sub}</div>
+          <a class="direct-link" href="${s.url}" target="_blank">↗ ${s.lbl}</a>
+        </div>
+      </div>
+    </div>`;
+      }).join('');
+      document.getElementById(cntId).textContent = `${done.length}/${steps.length}`;
+    }
+
+    function toggleStep(id, key) {
+      if (key === 'night') {
+        nightDone = nightDone.includes(id) ? nightDone.filter(x => x !== id) : [...nightDone, id];
+        localStorage.setItem('nightDone', JSON.stringify(nightDone));
+        renderSteps(NIGHT, nightDone, 'nightList', 'nightCnt', 'night');
+      } else {
+        mornDone = mornDone.includes(id) ? mornDone.filter(x => x !== id) : [...mornDone, id];
+        localStorage.setItem('mornDone', JSON.stringify(mornDone));
+        renderSteps(MORN, mornDone, 'mornList', 'mornCnt', 'morn');
+      }
+    }
+
+    // ── CHECKLIST ─────────────────────────────────────
+    function renderChecklist() {
+      document.getElementById('checkList').innerHTML = CHECKS.map(c => {
+        const d = checkDone.includes(c.id);
+        return `<div class="check-item">
+      <div class="ci-top">
+        <button class="ci-check ${d ? 'checked' : ''}" onclick="toggleCheck('${c.id}')">${d ? '✓' : ''}</button>
+        <div class="ci-label">${c.label}</div>
+        <button class="ci-info" onclick="openExp('${c.icon}','${c.label}',getExp('${c.id}'),'','')">?</button>
+      </div>
+    </div>`;
+      }).join('');
+      const all = CHECKS.every(c => checkDone.includes(c.id));
+      const btn = document.getElementById('goBtn');
+      if (all) { btn.className = 'go-trade go-green'; btn.textContent = '🚀 ALL CHECKS DONE — GO TRADE!'; }
+      else { btn.className = 'go-trade go-red'; btn.textContent = `🚫 ${CHECKS.length - checkDone.length} checks remaining — Trading Locked`; }
+    }
+
+    function toggleCheck(id) {
+      checkDone = checkDone.includes(id) ? checkDone.filter(x => x !== id) : [...checkDone, id];
+      localStorage.setItem('checkDone', JSON.stringify(checkDone));
+      renderChecklist();
+    }
+
+    // ── NEWS TABS ─────────────────────────────────────
+    function newsTab(id, btn) {
+      document.querySelectorAll('.news-tab').forEach(t => t.classList.remove('active'));
+      document.querySelectorAll('.news-sec').forEach(s => s.classList.remove('active'));
+      btn.classList.add('active');
+      document.getElementById('ns-' + id).classList.add('active');
+    }
+
+    // ── WATCHLIST ─────────────────────────────────────
+    function addWatch() {
+      const name = document.getElementById('wName').value.trim().toUpperCase();
+      if (!name) return alert('Enter stock name!');
+      watchlist.push({
+        id: Date.now(), name,
+        type: document.getElementById('wType').value,
+        entry: document.getElementById('wEntry').value,
+        target: document.getElementById('wTarget').value,
+        sl: document.getElementById('wSL').value,
+        note: document.getElementById('wNote').value
+      });
+      localStorage.setItem('watchlist', JSON.stringify(watchlist));
+      ['wName', 'wEntry', 'wTarget', 'wSL', 'wNote'].forEach(i => document.getElementById(i).value = '');
+      renderWatch();
+    }
+
+    function delWatch(id) {
+      watchlist = watchlist.filter(s => s.id !== id);
+      localStorage.setItem('watchlist', JSON.stringify(watchlist));
+      renderWatch();
+    }
+
+    function renderWatch() {
+      const el = document.getElementById('watchList');
+      if (!watchlist.length) { el.innerHTML = '<div class="empty"><div class="empty-icon">📋</div>No stocks yet!</div>'; return; }
+      el.innerHTML = watchlist.map(s => `
+    <div class="stock-card">
+      <div class="sc-top"><div class="sc-name">${s.name}</div><div class="tag ${s.type === 'intraday' ? 'tag-i' : 'tag-s'}">${s.type.toUpperCase()}</div></div>
+      <div class="levels">
+        <div class="lv"><div class="lv-l">Entry</div><div class="lv-v" style="color:var(--blue)">₹${s.entry || '–'}</div></div>
+        <div class="lv"><div class="lv-l">Target</div><div class="lv-v" style="color:var(--green)">₹${s.target || '–'}</div></div>
+        <div class="lv"><div class="lv-l">SL</div><div class="lv-v" style="color:var(--red)">₹${s.sl || '–'}</div></div>
+      </div>
+      ${s.note ? `<div class="sc-note">"${s.note}"</div>` : ''}
+      <button class="del-btn" onclick="delWatch(${s.id})">✕ Remove</button>
+    </div>`).join('');
+    }
+
+    // ── CAPITAL — single source of truth ─────────────
+    function updateCapDisplay() {
+      const fmt = '₹' + startCap.toLocaleString('en-IN');
+      ['startCapDisplay', 'settingsCap'].forEach(id => {
+        const el = document.getElementById(id);
+        if (el) el.textContent = fmt;
+      });
+    }
+
+    function editCapSettings() {
+      const row = document.getElementById('editCapRowSettings');
+      row.style.display = row.style.display === 'none' ? 'block' : 'none';
+      document.getElementById('capInputSettings').value = startCap;
+    }
+
+    function saveCapSettings() {
+      const val = parseInt(document.getElementById('capInputSettings').value);
+      if (!val || val < 1000) return alert('Enter valid amount!');
+      startCap = val;
+      localStorage.setItem('startCap', val);
+      document.getElementById('editCapRowSettings').style.display = 'none';
+      updateCapDisplay(); // syncs ALL capital displays everywhere
+      renderLog();
+    }
+
+    function editCap() {
+      const row = document.getElementById('editCapRow');
+      if (!row) return;
+      row.style.display = row.style.display === 'none' ? 'block' : 'none';
+      const inp = document.getElementById('capInput');
+      if (inp) inp.value = startCap;
+    }
+
+    function saveCap() {
+      const val = parseInt(document.getElementById('capInput').value);
+      if (!val || val < 1000) return alert('Enter valid amount!');
+      startCap = val;
+      localStorage.setItem('startCap', val);
+      document.getElementById('editCapRow').style.display = 'none';
+      updateCapDisplay();
+      renderLog();
+    }
+
+    // ── TRADE LOG ─────────────────────────────────────
+    function logTab(t, btn) {
+      document.querySelectorAll('.tab').forEach(b => b.classList.remove('active'));
+      document.querySelectorAll('.log-view').forEach(v => v.classList.remove('active'));
+      btn.classList.add('active');
+      document.getElementById('lv-' + t).classList.add('active');
+    }
+
+    function addTrade() {
+      const stock = document.getElementById('tStock').value.trim().toUpperCase();
+      const entry = parseFloat(document.getElementById('tEntry').value);
+      const exit = parseFloat(document.getElementById('tExit').value);
+      const qty = parseInt(document.getElementById('tQty').value);
+      if (!stock || !entry || !exit || !qty) return alert('Fill all fields!');
+      trades.push({
+        id: Date.now(), stock, type: document.getElementById('tType').value,
+        entry, exit, qty, pnl: (exit - entry) * qty,
+        date: document.getElementById('tDate').value,
+        note: document.getElementById('tNote').value
+      });
+      localStorage.setItem('trades', JSON.stringify(trades));
+      ['tStock', 'tEntry', 'tExit', 'tQty', 'tNote'].forEach(i => document.getElementById(i).value = '');
+      renderLog();
+      logTab('list', document.querySelectorAll('.tab')[0]);
+    }
+
+    function delTrade(id) {
+      trades = trades.filter(t => t.id !== id);
+      localStorage.setItem('trades', JSON.stringify(trades));
+      renderLog();
+    }
+
+    function renderLog() {
+      const now = new Date();
+      const monthly = trades.filter(t => { const d = new Date(t.date); return d.getMonth() === now.getMonth() && d.getFullYear() === now.getFullYear(); });
+      const total = monthly.reduce((s, t) => s + t.pnl, 0);
+      const wins = monthly.filter(t => t.pnl > 0).length;
+      const losses = monthly.filter(t => t.pnl <= 0).length;
+      const pct = Math.min(100, Math.max(0, Math.round((total / 30000) * 100)));
+      const wr = monthly.length ? Math.round((wins / monthly.length) * 100) : 0;
+      const curCap = startCap + trades.reduce((s, t) => s + t.pnl, 0);
+
+      // Update profile stats
+      const safe = id => { const el = document.getElementById(id); return el; };
+      if (safe('mPnl')) {
+        safe('mPnl').textContent = `${total >= 0 ? '+' : ''}₹${Math.abs(total).toFixed(0)}`;
+        safe('mPnl').className = 'mt-val ' + (total >= 0 ? 'up' : 'dn');
+        safe('mGoal').textContent = `${pct}% of ₹30,000 goal`;
+        safe('winRate').textContent = `${wr}%`;
+        safe('winRate').className = 'mt-val ' + (wr >= 50 ? 'up' : 'dn');
+        safe('totalTrades').textContent = monthly.length;
+        safe('totalWins').textContent = wins;
+        safe('totalLoss').textContent = losses;
+      }
+      // Update goal bar
+      document.getElementById('goalTxt').textContent = `₹${Math.max(0, total).toFixed(0)} / ₹30,000`;
+      document.getElementById('goalFill').style.width = pct + '%';
+      // Update capital
+      if (safe('curCapital')) {
+        safe('curCapital').textContent = `₹${curCap.toLocaleString('en-IN', { maximumFractionDigits: 0 })}`;
+        safe('curCapital').className = 'cap-v ' + (curCap >= startCap ? 'up' : 'dn');
+      }
+      // Trade list
+      const el = safe('tradeList');
+      if (!el) return;
+      if (!trades.length) { el.innerHTML = '<div class="empty"><div class="empty-icon">📒</div>No trades yet!</div>'; return; }
+      el.innerHTML = [...trades].reverse().map(t => `
+    <div class="trade-card">
+      <div class="tc-top">
+        <div><div class="tc-stock">${t.stock}</div><div class="tc-meta">${t.type.toUpperCase()} · ${t.date}</div></div>
+        <div class="tc-pnl ${t.pnl >= 0 ? 'up' : 'dn'}">${t.pnl >= 0 ? '+' : ''}₹${Math.abs(t.pnl).toFixed(0)}</div>
+      </div>
+      <div class="tc-details">
+        <div class="td-box"><div class="td-l">Entry</div><div class="td-v">₹${t.entry}</div></div>
+        <div class="td-box"><div class="td-l">Exit</div><div class="td-v">₹${t.exit}</div></div>
+        <div class="td-box"><div class="td-l">Qty</div><div class="td-v">${t.qty}</div></div>
+      </div>
+      ${t.note ? `<div class="tc-note">"${t.note}"</div>` : ''}
+      <button class="del-btn" onclick="delTrade(${t.id})">✕ Delete</button>
+    </div>`).join('');
+    }
+
+    // ── HELP POPUP ────────────────────────────────────
+    function toggleHelp(btn) {
+      const popup = document.getElementById('helpPopup');
+      const overlay = document.getElementById('helpOverlay');
+      const isOpen = popup.classList.contains('show');
+      if (isOpen) { closeHelp(); return; }
+      popup.classList.add('show');
+      overlay.classList.add('show');
+      document.querySelectorAll('.nb').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+    }
+    function closeHelp() {
+      document.getElementById('helpPopup').classList.remove('show');
+      document.getElementById('helpOverlay').classList.remove('show');
+      document.querySelectorAll('.nb').forEach(b => b.classList.remove('active'));
+    }
+    // Close help when clicking outside
+    document.addEventListener('click', function (e) {
+      const popup = document.getElementById('helpPopup');
+      if (popup.classList.contains('show') && !popup.contains(e.target) && !e.target.closest('.nb')) {
+        closeHelp();
+      }
+    });
+
+    // ── POSITION SIZE CALCULATOR ──────────────────────
+    function showCalcHelp() {
+      const el = document.getElementById('calcHelp');
+      el.style.display = el.style.display === 'none' ? 'block' : 'none';
+    }
+
+    function calcPosition() {
+      const cap = parseFloat(document.getElementById('calcCap').value) || 150000;
+      const risk = parseFloat(document.getElementById('calcRisk').value) || 750;
+      const entry = parseFloat(document.getElementById('calcEntry').value);
+      const sl = parseFloat(document.getElementById('calcSL').value);
+      const target = parseFloat(document.getElementById('calcTarget').value);
+      const res = document.getElementById('calcResult');
+
+      if (!entry || !sl) { res.style.display = 'block'; res.innerHTML = '<div style="color:var(--red);text-align:center;padding:12px">⚠️ Please enter Entry and Stop Loss prices!</div>'; return; }
+      if (sl >= entry) { res.style.display = 'block'; res.innerHTML = '<div style="color:var(--red);text-align:center;padding:12px">⚠️ Stop Loss must be BELOW Entry price for a BUY trade!</div>'; return; }
+
+      const riskPerShare = entry - sl;
+      const qty = Math.floor(risk / riskPerShare);
+      const investment = qty * entry;
+      const maxLoss = qty * riskPerShare;
+      const riskPct = (maxLoss / cap) * 100;
+
+      let rrHtml = '';
+      if (target) {
+        const reward = target - entry;
+        const rr = (reward / riskPerShare).toFixed(2);
+        const rrNum = parseFloat(rr);
+        if (rrNum >= 2) {
+          rrHtml = `<div class="rr-good" style="margin-bottom:8px"><div style="font-size:13px;font-weight:700;color:var(--green)">✅ R:R = 1:${rr} — EXCELLENT! Take this trade!</div><div style="font-size:11px;color:var(--text2);margin-top:4px">Risk ₹${maxLoss.toFixed(0)} to make ₹${(qty * reward).toFixed(0)}</div></div>`;
+        } else if (rrNum >= 1.5) {
+          rrHtml = `<div class="rr-ok" style="margin-bottom:8px"><div style="font-size:13px;font-weight:700;color:var(--gold)">⚠️ R:R = 1:${rr} — Acceptable. Consider if setup is very strong.</div></div>`;
+        } else {
+          rrHtml = `<div class="rr-warn" style="margin-bottom:8px"><div style="font-size:13px;font-weight:700;color:var(--red)">❌ R:R = 1:${rr} — DO NOT TAKE THIS TRADE!</div><div style="font-size:11px;color:var(--text2);margin-top:4px">R:R must be at least 1:2. Either move target higher or tighten stop loss.</div></div>`;
+        }
+      }
+
+      let warningHtml = '';
+      if (riskPct > 2) { warningHtml = `<div style="background:rgba(239,68,68,0.12);border:1px solid var(--red);border-radius:8px;padding:10px;margin-top:8px;font-size:12px;color:var(--red)">⚠️ WARNING: You are risking ${riskPct.toFixed(1)}% of capital! Maximum recommended is 2% (₹${(cap * 0.02).toFixed(0)}). Reduce risk!</div>`; }
+
+      res.style.display = 'block';
+      res.innerHTML = `
+    <div class="result-card">
+      <div style="font-size:14px;font-weight:700;color:var(--accent);margin-bottom:12px">📊 Result</div>
+      ${rrHtml}
+      <div class="rc-row"><span class="rc-label">Risk per share</span><span class="rc-val">₹${riskPerShare.toFixed(2)}</span></div>
+      <div class="rc-row"><span class="rc-label">Quantity to buy</span><span class="rc-val" style="color:var(--green);font-size:18px">${qty} shares</span></div>
+      <div class="rc-row"><span class="rc-label">Total investment</span><span class="rc-val">₹${investment.toLocaleString('en-IN')}</span></div>
+      <div class="rc-row"><span class="rc-label">Max loss if SL hits</span><span class="rc-val" style="color:var(--red)">₹${maxLoss.toFixed(0)}</span></div>
+      <div class="rc-row"><span class="rc-label">Risk % of capital</span><span class="rc-val" style="color:${riskPct > 2 ? 'var(--red)' : 'var(--green)'}">${riskPct.toFixed(2)}%</span></div>
+      ${target ? `<div class="rc-row"><span class="rc-label">Potential profit</span><span class="rc-val" style="color:var(--green)">₹${(qty * (target - entry)).toFixed(0)}</span></div>` : ''}
+      ${warningHtml}
+    </div>`;
+    }
+
+    // ── PRE-TRADE FORM ─────────────────────────────────
+    let ptTrades = JSON.parse(localStorage.getItem('ptTrades') || '[]');
+
+    function selectPattern(btn, pattern) {
+      document.querySelectorAll('.pat-btn').forEach(b => b.classList.remove('selected'));
+      btn.classList.add('selected');
+      document.getElementById('ptPattern').value = pattern;
+    }
+
+    function calcRR() {
+      const entry = parseFloat(document.getElementById('ptEntry').value);
+      const sl = parseFloat(document.getElementById('ptSL').value);
+      const target = parseFloat(document.getElementById('ptTarget').value);
+      const disp = document.getElementById('rrDisplay');
+      if (!entry || !sl || !target) { disp.style.display = 'none'; return; }
+      if (sl >= entry) { disp.style.display = 'block'; disp.innerHTML = '<span style="color:var(--red);font-size:12px">⚠️ Stop Loss must be below Entry price!</span>'; return; }
+      const risk = entry - sl;
+      const reward = target - entry;
+      if (reward <= 0) { disp.style.display = 'block'; disp.innerHTML = '<span style="color:var(--red);font-size:12px">⚠️ Target must be above Entry price!</span>'; return; }
+      const rr = (reward / risk).toFixed(2);
+      const rrNum = parseFloat(rr);
+      disp.style.display = 'block';
+      if (rrNum >= 2) {
+        disp.innerHTML = `<div class="rr-good"><strong style="color:var(--green)">✅ R:R = 1:${rr} — GREAT! Go ahead with this trade!</strong><br><span style="font-size:11px;color:var(--text2)">Risk: ₹${risk.toFixed(0)}/share → Reward: ₹${reward.toFixed(0)}/share</span></div>`;
+      } else if (rrNum >= 1.5) {
+        disp.innerHTML = `<div class="rr-ok"><strong style="color:var(--gold)">⚠️ R:R = 1:${rr} — Borderline. Only if setup is very strong!</strong></div>`;
+      } else {
+        disp.innerHTML = `<div class="rr-warn"><strong style="color:var(--red)">❌ R:R = 1:${rr} — SKIP THIS TRADE!</strong><br><span style="font-size:11px;color:var(--text2)">R:R less than 1:2. Move target higher or stop loss closer!</span></div>`;
+      }
+    }
+
+    function savePreTrade() {
+      const stock = document.getElementById('ptStock').value.trim().toUpperCase();
+      const pattern = document.getElementById('ptPattern').value;
+      const entry = document.getElementById('ptEntry').value;
+      const sl = document.getElementById('ptSL').value;
+      const target = document.getElementById('ptTarget').value;
+      const reason = document.getElementById('ptReason').value;
+      if (!stock || !entry || !sl || !target) { alert('Please fill Stock, Entry, SL and Target!'); return; }
+      if (!pattern) { alert('Please select a pattern/signal!'); return; }
+      ptTrades.unshift({ id: Date.now(), stock, pattern, entry, sl, target, reason, date: new Date().toLocaleDateString('en-IN') });
+      localStorage.setItem('ptTrades', JSON.stringify(ptTrades));
+      document.getElementById('ptStock').value = '';
+      document.getElementById('ptEntry').value = '';
+      document.getElementById('ptSL').value = '';
+      document.getElementById('ptTarget').value = '';
+      document.getElementById('ptReason').value = '';
+      document.getElementById('ptPattern').value = '';
+      document.querySelectorAll('.pat-btn').forEach(b => b.classList.remove('selected'));
+      document.getElementById('rrDisplay').style.display = 'none';
+      renderPtList();
+      alert('✅ Trade plan saved! Now execute with discipline!');
+    }
+
+    function renderPtList() {
+      const el = document.getElementById('ptList');
+      if (!ptTrades.length) { el.innerHTML = '<div class="empty"><div class="empty-icon">📝</div>No trade plans yet today!</div>'; return; }
+      el.innerHTML = ptTrades.slice(0, 5).map(t => {
+        const risk = t.entry - t.sl;
+        const reward = t.target - parseFloat(t.entry);
+        const rr = risk > 0 ? (reward / risk).toFixed(1) : '–';
+        return `<div class="result-card">
+      <div class="rc-row"><span style="font-size:15px;font-weight:700">${t.stock}</span><span style="font-size:10px;color:var(--text3)">${t.date}</span></div>
+      <div style="background:var(--card2);border-radius:6px;padding:6px 8px;margin-bottom:8px;font-size:11px;color:var(--accent)">📊 ${t.pattern}</div>
+      <div class="rc-row"><span class="rc-label">Entry / SL / Target</span><span class="rc-val" style="font-size:11px">₹${t.entry} / ₹${t.sl} / ₹${t.target}</span></div>
+      <div class="rc-row"><span class="rc-label">R:R Ratio</span><span class="rc-val" style="color:${parseFloat(rr) >= 2 ? 'var(--green)' : 'var(--red)'}">1:${rr}</span></div>
+      ${t.reason ? `<div style="font-size:11px;color:var(--text3);font-style:italic;margin-top:4px">"${t.reason}"</div>` : ''}
+    </div>`;
+      }).join('');
+    }
+
+    // ── DAILY P&L TRACKER ─────────────────────────────
+    const todayKey = 'dpTrades_' + new Date().toDateString();
+    let dpTrades = JSON.parse(localStorage.getItem(todayKey) || '[]');
+
+    function addDailyTrade() {
+      const stock = document.getElementById('dpStock').value.trim().toUpperCase();
+      const pnl = parseFloat(document.getElementById('dpPnl').value);
+      if (!stock || isNaN(pnl)) { alert('Enter stock name and P&L!'); return; }
+      dpTrades.push({ stock, pnl, time: new Date().toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit' }) });
+      localStorage.setItem(todayKey, JSON.stringify(dpTrades));
+      document.getElementById('dpStock').value = '';
+      document.getElementById('dpPnl').value = '';
+      renderDailyPnl();
+    }
+
+    function renderDailyPnl() {
+      const total = dpTrades.reduce((s, t) => s + t.pnl, 0);
+      const pct = Math.min(100, Math.max(0, (total / 1000) * 100));
+      const el = document.getElementById('dailyPnl');
+      if (el) {
+        el.textContent = `${total >= 0 ? '+' : ''}₹${total.toFixed(0)}`;
+        el.className = 'mt-val ' + (total >= 0 ? 'up' : 'dn');
+        document.getElementById('dailyStatus').textContent = total >= 1000 ? '🎉 Daily target HIT!' : total <= -1500 ? '🛑 STOP TRADING!' : total < 0 ? `₹${Math.abs(total).toFixed(0)} loss — be careful!` : `₹${(1000 - total).toFixed(0)} more to hit ₹1,000 target`;
+        document.getElementById('dailyBar').style.width = Math.max(0, pct) + '%';
+        document.getElementById('dailyBar').style.background = total < 0 ? 'var(--red)' : total >= 1000 ? 'var(--green)' : 'var(--gold)';
+        document.getElementById('stopAlert').style.display = total <= -1500 ? 'block' : 'none';
+      }
+      const list = document.getElementById('dailyList');
+      if (!list) return;
+      if (!dpTrades.length) { list.innerHTML = '<div class="empty"><div class="empty-icon">📅</div>No trades added today!</div>'; return; }
+      list.innerHTML = dpTrades.map(t => `
+    <div style="background:var(--card);border:1px solid var(--border);border-radius:10px;padding:10px 14px;margin-bottom:6px;display:flex;justify-content:space-between;align-items:center">
+      <div><div style="font-size:14px;font-weight:600">${t.stock}</div><div style="font-size:10px;color:var(--text3)">${t.time}</div></div>
+      <div style="font-family:'JetBrains Mono',monospace;font-size:16px;font-weight:700;color:${t.pnl >= 0 ? 'var(--green)' : 'var(--red)'}">${t.pnl >= 0 ? '+' : ''}₹${t.pnl}</div>
+    </div>`).join('');
+    }
+
+    // ── TRADE REVIEW ──────────────────────────────────
+    let reviews = JSON.parse(localStorage.getItem('tradeReviews') || '[]');
+
+    function saveReview() {
+      const stock = document.getElementById('revStock').value.trim().toUpperCase();
+      if (!stock) { alert('Enter stock name!'); return; }
+      reviews.unshift({
+        id: Date.now(), stock, result: document.getElementById('revResult').value,
+        right: document.getElementById('revRight').value,
+        wrong: document.getElementById('revWrong').value,
+        diff: document.getElementById('revDiff').value,
+        date: new Date().toLocaleDateString('en-IN')
+      });
+      localStorage.setItem('tradeReviews', JSON.stringify(reviews));
+      ['revStock', 'revRight', 'revWrong', 'revDiff'].forEach(i => document.getElementById(i).value = '');
+      renderReviews();
+      alert('✅ Review saved! This is how you improve!');
+    }
+
+    function renderReviews() {
+      const el = document.getElementById('reviewList');
+      if (!el) return;
+      if (!reviews.length) { el.innerHTML = '<div class="empty"><div class="empty-icon">🔍</div>No reviews yet! Add your first review after today\'s trade!</div>'; return; }
+      const icons = { win: '✅', loss: '❌', breakeven: '➡️' };
+      el.innerHTML = reviews.slice(0, 10).map(r => `
+    <div class="result-card">
+      <div class="rc-row"><span style="font-size:15px;font-weight:700">${r.stock}</span><span>${icons[r.result] || ''} <span style="font-size:11px;color:var(--text3)">${r.date}</span></span></div>
+      ${r.right ? `<div style="margin-bottom:6px"><div style="font-size:10px;color:var(--green);font-weight:700;margin-bottom:2px">✅ What went right:</div><div style="font-size:12px;color:var(--text2)">${r.right}</div></div>` : ''}
+      ${r.wrong ? `<div style="margin-bottom:6px"><div style="font-size:10px;color:var(--red);font-weight:700;margin-bottom:2px">❌ What went wrong:</div><div style="font-size:12px;color:var(--text2)">${r.wrong}</div></div>` : ''}
+      ${r.diff ? `<div><div style="font-size:10px;color:var(--accent);font-weight:700;margin-bottom:2px">🎯 Next time:</div><div style="font-size:12px;color:var(--text2)">${r.diff}</div></div>` : ''}
+    </div>`).join('');
+    }
+
+    // ── SCREENER SHORTLIST ────────────────────────────
+    const scKey = 'screener_' + new Date().toDateString();
+    let screenerList = JSON.parse(localStorage.getItem(scKey) || '[]');
+
+    function addScreener() {
+      const stock = document.getElementById('scStock').value.trim().toUpperCase();
+      if (!stock) { alert('Enter stock name!'); return; }
+      if (screenerList.length >= 3) { alert('Maximum 3 stocks only! Focus is key! 🎯'); return; }
+      screenerList.push({ stock, source: document.getElementById('scSource').value, reason: document.getElementById('scReason').value });
+      localStorage.setItem(scKey, JSON.stringify(screenerList));
+      document.getElementById('scStock').value = '';
+      document.getElementById('scReason').value = '';
+      renderScreener();
+    }
+
+    function clearScreener() {
+      screenerList = [];
+      localStorage.setItem(scKey, JSON.stringify(screenerList));
+      renderScreener();
+    }
+
+    function renderScreener() {
+      const el = document.getElementById('screenerList');
+      if (!el) return;
+      if (!screenerList.length) { el.innerHTML = '<div class="empty"><div class="empty-icon">🎯</div>No stocks shortlisted yet!<br>Check the 3 sources above and add 2-3 stocks!</div>'; return; }
+      el.innerHTML = `<div style="font-size:11px;color:var(--text3);margin-bottom:8px">Today's shortlist (${screenerList.length}/3):</div>` +
+        screenerList.map((s, i) => `
+    <div class="result-card" style="border-color:rgba(245,158,11,0.3)">
+      <div class="rc-row">
+        <span style="font-size:16px;font-weight:700;color:var(--accent)">${i + 1}. ${s.stock}</span>
+        <span style="font-size:10px;background:var(--card2);padding:3px 8px;border-radius:10px;color:var(--text3)">${s.source}</span>
+      </div>
+      ${s.reason ? `<div style="font-size:12px;color:var(--text2);margin-top:4px">"${s.reason}"</div>` : ''}
+    </div>`).join('');
+    }
+
+    // ── MONTHLY REPORT ────────────────────────────────
+    function renderMonthlyReport() {
+      const el = document.getElementById('monthlyReport');
+      if (!el) return;
+      const now = new Date();
+      const monthly = trades.filter(t => { const d = new Date(t.date); return d.getMonth() === now.getMonth() && d.getFullYear() === now.getFullYear(); });
+      if (!monthly.length) { el.innerHTML = '<div class="empty"><div class="empty-icon">📈</div>No trades this month yet!</div>'; return; }
+      const total = monthly.reduce((s, t) => s + t.pnl, 0);
+      const wins = monthly.filter(t => t.pnl > 0);
+      const losses = monthly.filter(t => t.pnl < 0);
+      const avgWin = wins.length ? wins.reduce((s, t) => s + t.pnl, 0) / wins.length : 0;
+      const avgLoss = losses.length ? Math.abs(losses.reduce((s, t) => s + t.pnl, 0) / losses.length) : 0;
+      const wr = Math.round((wins.length / monthly.length) * 100);
+      el.innerHTML = `
+    <div class="result-card">
+      <div style="font-size:14px;font-weight:700;color:var(--accent);margin-bottom:12px">${now.toLocaleDateString('en-IN', { month: 'long', year: 'numeric' })}</div>
+      <div class="rc-row"><span class="rc-label">Total P&L</span><span class="rc-val" style="color:${total >= 0 ? 'var(--green)' : 'var(--red)'};font-size:20px">${total >= 0 ? '+' : ''}₹${total.toFixed(0)}</span></div>
+      <div class="rc-row"><span class="rc-label">Goal Progress</span><span class="rc-val">${Math.round((total / 30000) * 100)}% of ₹30,000</span></div>
+      <div class="rc-row"><span class="rc-label">Total Trades</span><span class="rc-val">${monthly.length}</span></div>
+      <div class="rc-row"><span class="rc-label">Win Rate</span><span class="rc-val" style="color:${wr >= 50 ? 'var(--green)' : 'var(--red)'}">${wr}%</span></div>
+      <div class="rc-row"><span class="rc-label">Wins / Losses</span><span class="rc-val">${wins.length} / ${losses.length}</span></div>
+      <div class="rc-row"><span class="rc-label">Avg Win</span><span class="rc-val" style="color:var(--green)">+₹${avgWin.toFixed(0)}</span></div>
+      <div class="rc-row"><span class="rc-label">Avg Loss</span><span class="rc-val" style="color:var(--red)">-₹${avgLoss.toFixed(0)}</span></div>
+      <div class="rc-row"><span class="rc-label">Best Trade</span><span class="rc-val" style="color:var(--green)">+₹${Math.max(...monthly.map(t => t.pnl)).toFixed(0)}</span></div>
+      <div class="rc-row"><span class="rc-label">Worst Trade</span><span class="rc-val" style="color:var(--red)">₹${Math.min(...monthly.map(t => t.pnl)).toFixed(0)}</span></div>
+    </div>`;
+    }
+
+    // ── STREAK TRACKER ────────────────────────────────
+    function renderStreak() {
+      const el = document.getElementById('streakView');
+      if (!el) return;
+      const byDay = {};
+      trades.forEach(t => {
+        if (!byDay[t.date]) byDay[t.date] = 0;
+        byDay[t.date] += t.pnl;
+      });
+      const days = Object.entries(byDay).sort((a, b) => new Date(a[0]) - new Date(b[0]));
+      let streak = 0, maxStreak = 0, cur = 0;
+      days.forEach(([, pnl]) => {
+        if (pnl > 0) { cur++; maxStreak = Math.max(maxStreak, cur); }
+        else cur = 0;
+      });
+      streak = cur;
+      el.innerHTML = `
+    <div class="result-card" style="text-align:center;margin-bottom:12px">
+      <div style="font-size:48px;margin-bottom:8px">${streak >= 3 ? '🔥' : streak >= 1 ? '✅' : '💤'}</div>
+      <div style="font-size:32px;font-weight:800;color:${streak >= 3 ? 'var(--gold)' : streak >= 1 ? 'var(--green)' : 'var(--text3)'}">${streak}</div>
+      <div style="font-size:14px;color:var(--text2);margin-top:4px">Current Green Day Streak</div>
+      <div style="font-size:12px;color:var(--text3);margin-top:8px">Best streak: ${maxStreak} days 🏆</div>
+    </div>
+    <div style="font-size:12px;color:var(--text3);text-align:center;padding:8px">${streak === 0 ? 'Start trading to build your streak!' : streak < 3 ? 'Keep going! 3 green days = 🔥' : streak < 5 ? '🔥 On fire! Keep the discipline!' : '🏆 Legendary! You are on a roll!'}</div>`;
+    }
+
+    // ── BROKERAGE CALCULATOR ──────────────────────────
+    function calcBrokerage() {
+      const type = document.getElementById('brType').value;
+      const buy = parseFloat(document.getElementById('brBuy').value);
+      const sell = parseFloat(document.getElementById('brSell').value);
+      const qty = parseInt(document.getElementById('brQty').value);
+      const res = document.getElementById('brokerageResult');
+      if (!buy || !sell || !qty) { res.style.display = 'none'; return; }
+
+      const turnover = (buy + sell) * qty;
+      const brokerage = Math.min(20, turnover * 0.0005) * 2; // both buy and sell
+      const stt = type === 'intraday' ? (sell * qty * 0.00025) : (sell * qty * 0.001);
+      const exchCharge = turnover * 0.0000335;
+      const gst = (brokerage + exchCharge) * 0.18;
+      const sebi = turnover * 0.000001;
+      const stamp = buy * qty * 0.00003;
+      const totalCharges = brokerage + stt + exchCharge + gst + sebi + stamp;
+      const grossPnl = (sell - buy) * qty;
+      const netPnl = grossPnl - totalCharges;
+
+      res.style.display = 'block';
+      res.innerHTML = `
+    <div class="result-card">
+      <div style="font-size:14px;font-weight:700;color:var(--accent);margin-bottom:12px">💰 Charges Breakdown</div>
+      <div class="rc-row"><span class="rc-label">Gross P&L</span><span class="rc-val" style="color:${grossPnl >= 0 ? 'var(--green)' : 'var(--red)'}">${grossPnl >= 0 ? '+' : ''}₹${grossPnl.toFixed(2)}</span></div>
+      <div class="rc-row"><span class="rc-label">Brokerage (Groww)</span><span class="rc-val">-₹${brokerage.toFixed(2)}</span></div>
+      <div class="rc-row"><span class="rc-label">STT</span><span class="rc-val">-₹${stt.toFixed(2)}</span></div>
+      <div class="rc-row"><span class="rc-label">Exchange Charges</span><span class="rc-val">-₹${exchCharge.toFixed(2)}</span></div>
+      <div class="rc-row"><span class="rc-label">GST</span><span class="rc-val">-₹${gst.toFixed(2)}</span></div>
+      <div class="rc-row"><span class="rc-label">SEBI + Stamp</span><span class="rc-val">-₹${(sebi + stamp).toFixed(2)}</span></div>
+      <div style="border-top:1px solid var(--border);margin:10px 0"></div>
+      <div class="rc-row"><span class="rc-label">Total Charges</span><span class="rc-val" style="color:var(--red)">-₹${totalCharges.toFixed(2)}</span></div>
+      <div class="rc-row"><span style="font-size:13px;font-weight:700">Net P&L</span><span class="rc-val" style="color:${netPnl >= 0 ? 'var(--green)' : 'var(--red)'};font-size:18px">${netPnl >= 0 ? '+' : ''}₹${netPnl.toFixed(2)}</span></div>
+    </div>`;
+    }
+
+    // ── AI TEACHER ────────────────────────────────────
+    let aiOpen = false;
+    function toggleAI() {
+      aiOpen = !aiOpen;
+      document.getElementById('aiPanel').className = 'ai-panel' + (aiOpen ? ' show' : '');
+    }
+
+    function sendAI() {
+      const input = document.getElementById('aiInput');
+      const msg = input.value.trim();
+      if (!msg) return;
+      input.value = '';
+      askAI(msg);
+    }
+
+    async function askAI(question) {
+      const msgs = document.getElementById('aiMessages');
+      msgs.innerHTML += `<div class="ai-msg user">${question}</div>`;
+      const typingId = 'typing_' + Date.now();
+      msgs.innerHTML += `<div class="ai-msg bot" id="${typingId}">⏳ Thinking...</div>`;
+      msgs.scrollTop = msgs.scrollHeight;
+      try {
+        const res = await fetch('https://api.anthropic.com/v1/messages', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', 'anthropic-dangerous-direct-browser-access': 'true' },
+          body: JSON.stringify({
+            model: 'claude-haiku-4-5-20251001',
+            max_tokens: 500,
+            system: `You are a trading teacher for Ranjith Kumar, a beginner trader in Bangalore trading Indian stocks on Groww with ₹1.5 lakh capital. Monthly goal ₹30,000. Explain simply, use Indian examples, Indian stocks (SBI, TCS, Nifty etc), Indian rupees. Keep answers short and practical. Use emojis occasionally.`,
+            messages: [{ role: 'user', content: question }]
+          })
+        });
+        const data = await res.json();
+        if (data.error) {
+          document.getElementById(typingId).innerHTML = `❌ API Error. <a href="https://claude.ai" target="_blank" style="color:var(--accent)">Open Claude.ai instead →</a>`;
+        } else {
+          document.getElementById(typingId).textContent = data.content?.[0]?.text || 'Sorry, try again!';
+        }
+      } catch {
+        document.getElementById(typingId).innerHTML = `❌ Connection error. <a href="https://claude.ai" target="_blank" style="color:var(--accent)">Open Claude.ai instead →</a>`;
+      }
+      msgs.scrollTop = msgs.scrollHeight;
+    }
+
+
+    // ── INIT ──────────────────────────────────────────
+    initHeader();
+    updateCapDisplay();
+    setMode(mktState.mode || 'pre');
+    renderSteps(NIGHT, nightDone, 'nightList', 'nightCnt', 'night');
+    renderSteps(MORN, mornDone, 'mornList', 'mornCnt', 'morn');
+    renderChecklist();
+    renderWatch();
+    renderLog();
+    setInterval(initHeader, 60000);
+
+    // Handle URL hash on load (Netlify deep link support)
+    (function () {
+      const hash = location.hash.replace('#', '');
+      const validScreens = ['home', 'night', 'morning', 'check', 'profile', 'watchlist', 'tradelog', 'news', 'settings', 'calculator', 'pretrade', 'dailypnl', 'review', 'screener', 'monthly', 'streak', 'brokerage'];
+      const startScreen = validScreens.includes(hash) ? hash : 'home';
+      _applyScreen(startScreen);
+      // Push initial state so back button has something to go back to
+      if (!IS_FILE) {
+        try { history.replaceState({ screen: startScreen }, '', '#' + startScreen); } catch (e) { }
+      }
+    })();
+  </script>
+</body>
+
+</html>
